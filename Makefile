@@ -17,8 +17,8 @@ build:
 build/main.o: src/main.c
 	$(CC) -o build/main.o -c src/main.c
 
-build/CuTest.o: lib/CuTest.c lib/CuTest.h
-	$(CC) -o build/CuTest.o -c lib/CuTest.c
+build/CuTest.o: lib/cutest/CuTest.c lib/cutest/CuTest.h
+	$(CC) -o build/CuTest.o -c lib/cutest/CuTest.c
 
 .PHONY: clean
 clean:
