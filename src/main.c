@@ -4,7 +4,7 @@
 #define VERSION "1.0.0"
 
 static void print_version(char *name);
-static void print_help(void);
+static void print_help(char *name);
 
 int main(int argc, char *argv[])
 {
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
                     }
                     else if (strcmp(argv[i], "--help") == 0)
                     {
-                        print_help();
+                        print_help(argv[0]);
                     }
                 }
                 else
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
                     }
                     else if (strcmp(argv[i], "-h") == 0)
                     {
-                        print_help();
+                        print_help(argv[0]);
                     }
                 }
             }
@@ -62,9 +62,18 @@ static void print_version(char *name)
     return;
 }
 
-static void print_help(void)
+static void print_help(char *name)
 {
-    printf("*Help text*\r\n");
+    printf(
+        "%s [OPTIONS] [PATH TO FILE]\r\n"
+        "\r\n"
+        "OPTIONS:\r\n"
+        "-h --help\r\n"
+        "           Display this help text.\r\n"
+        "-v --version\r\n"
+        "           Display version information.\r\n",
+        strrchr(name, '/') + 1
+        );
 
     return;
 }
