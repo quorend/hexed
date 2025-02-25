@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Lots of work to do...\r\n");
+        print_help(argv[0]);
     }
 
     return 0;
