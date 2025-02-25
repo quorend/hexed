@@ -31,6 +31,14 @@ int main(int argc, char *argv[])
                 else
                 {
                     /* Short option */
+                    if (strcmp(argv[i], "-v") == 0)
+                    {
+                        print_version(argv[0]);
+                    }
+                    else if (strcmp(argv[i], "-h") == 0)
+                    {
+                        print_help();
+                    }
                 }
             }
             else
