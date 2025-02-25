@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
 static void print_version(char *name)
 {
-    printf("%s\r\nversion %s\r\n", name, VERSION);
+    printf("%s v%s\r\n", strrchr(name, '/') + 1, VERSION);
 
     return;
 }
