@@ -1,7 +1,9 @@
 CC = gcc -g -I lib
 
 OBJCOMMON = \
-build/CuTest.o
+build/CuTest.o \
+build/file-access.o \
+build/buffer.o
 
 OBJBUILD = \
 build/main.o \
@@ -36,6 +38,12 @@ build/main.o: src/main.c
 
 build/CuTest.o: lib/cutest/CuTest.c lib/cutest/CuTest.h
 	$(CC) -o build/CuTest.o -c lib/cutest/CuTest.c
+
+build/file-access.o: src/file-access.c src/file-access.h
+	$(CC) -o build/file-access.o -c src/file-access.c
+
+build/buffer.o: src/buffer.c src/buffer.h
+	$(CC) -o build/buffer.o -c src/buffer.c
 
 test/build/main.o: test/main.c
 	$(CC) -o test/build/main.o -c test/main.c

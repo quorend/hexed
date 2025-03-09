@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "file-access.h"
+
 #define VERSION "1.0.0"
 
 static void print_version(char *name);
@@ -44,6 +46,7 @@ int main(int argc, char *argv[])
             else
             {
                 /* Filename */
+                load_file();
             }
         }
     }
