@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "file-access.h"
+#include "buffer.h"
 
 #define VERSION "1.0.0"
 
@@ -45,8 +46,17 @@ int main(int argc, char *argv[])
             }
             else
             {
+                int rc = 0;
+
                 /* Filename */
-                load_file();
+                buffer_init();
+
+                rc = file_access_loadFile(argv[1]);
+                if (rc)
+                {
+                    printf("ERR: file_access_loadFile()\r\n");
+                    return 0;
+                }
             }
         }
     }

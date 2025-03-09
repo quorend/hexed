@@ -1,10 +1,19 @@
 #include <stdio.h>
 
 #include "file-access.h"
+#include "buffer.h"
 
-void load_file(void)
+int file_access_loadFile(char *path)
 {
-    printf("%s() called.\r\n", __FUNCTION__);
+    FILE *fp;
 
-    return;
+    fp = fopen(path, "r");
+    if (!fp)
+    {
+        return 1;
+    }
+
+    fclose(fp);
+
+    return 0;
 }
