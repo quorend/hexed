@@ -13,6 +13,9 @@ void display_draw(void)
     size_t addr = buffer_ctx.window.first_row;
     uint8_t *buff_p = buffer_ctx.buf;
 
+    (void)addr;
+    (void)buff_p;
+
     printf("%s", CLR);
     printf("%s", HEADER);
 

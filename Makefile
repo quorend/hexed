@@ -1,4 +1,4 @@
-CC = gcc -g -I lib
+CC = gcc -g -I lib -Wall -Werror
 
 OBJCOMMON = \
 build/CuTest.o \
@@ -16,7 +16,11 @@ $(OBJCOMMON)
 
 # Build targets
 .PHONY: all
-all: build/hexed test/build/tests
+all: build/hexed test/build/tests runtests
+
+.PHONY: runtests
+runtests: build/hexed test/build/tests
+	./test/build/tests
 
 build/hexed: build $(OBJBUILD)
 	$(CC) -o build/hexed $(OBJBUILD)
