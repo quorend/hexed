@@ -37,6 +37,8 @@ int file_access_loadFile(char *path)
         return 1;
     }
 
+    buffer_ctx.buf_len = statbuf.st_size;
+
     /* Load file contents into buffer */
     fread(buffer_ctx.buf, sizeof(uint8_t), statbuf.st_size, fp);
 

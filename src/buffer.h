@@ -7,6 +7,7 @@
 struct Buffer_Ctx{
     /* Buffer contents */
     uint8_t *buf;
+    size_t buf_len;
 
     struct {
         /* Determine which address to show at the top of the address frame */
