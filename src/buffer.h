@@ -9,6 +9,13 @@ struct Buffer_Ctx{
     uint8_t *buf;
 
     struct {
+        /* Determine which address to show at the top of the address frame */
+        size_t first_row;
+        /* Determine which byte to show first in the byte frame */
+        uint8_t *first_byte;
+    } window;
+
+    struct {
         uint64_t position;
     } point;
     
