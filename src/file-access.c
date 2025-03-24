@@ -3,9 +3,10 @@
 #include <stdlib.h>
 
 #include "file-access.h"
+#include "cutest/CuTest.h"
 #include "buffer.h"
 
-int file_access_loadFile(char *path)
+int file_access_loadFile(const char *path)
 {
     FILE *fp;
     struct stat statbuf;
@@ -45,4 +46,27 @@ int file_access_loadFile(char *path)
     fclose(fp);
 
     return 0;
+}
+
+void TestBufLen(CuTest *tc)
+{
+    struct stat st;
+    const char path[] = "src/main.c";
+
+    if (file_access_loadFile(path))
+    {
+        CuFail(tc, "Failed to load file");
+        return;
+    }
+
+    stat(path, &st);
+
+    CuAssertIntEquals(tc, st.st_size, buffer_ctx.buf_len);
+}
+
+CuSuite *file_access_GetSuite()
+{
+    CuSuite *suite = CuSuiteNew();
+    SUITE_ADD_TEST(suite, TestBufLen);
+    return suite;
 }

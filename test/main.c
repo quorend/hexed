@@ -4,6 +4,8 @@
 
 static void RunAllTests(void);
 
+CuSuite *file_access_GetSuite();
+
 int main(void)
 {
     RunAllTests();
@@ -15,6 +17,8 @@ static void RunAllTests(void)
 {
     CuString *output = CuStringNew();
     CuSuite * suite = CuSuiteNew();
+
+    CuSuiteAddSuite(suite, file_access_GetSuite());
 
     CuSuiteRun(suite);
     CuSuiteSummary(suite, output);
