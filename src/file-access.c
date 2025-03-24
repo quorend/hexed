@@ -11,6 +11,7 @@ int file_access_loadFile(const char *path)
     FILE *fp;
     struct stat statbuf;
     int file_desc;
+    size_t bytes_read = 0;
 
     /* Open file */
     fp = fopen(path, "r");
@@ -29,19 +30,23 @@ int file_access_loadFile(const char *path)
 
     /* Get file stats (filesize) */
     fstat(file_desc, &statbuf);
+    buffer_ctx.buf_len = statbuf.st_size;
 
     /* Allocate memory for buffer */
-    buffer_ctx.buf = malloc(statbuf.st_size);
+    buffer_ctx.buf = malloc(buffer_ctx.buf_len);
     if (buffer_ctx.buf == NULL)
     {
         fclose(fp);
         return 1;
     }
 
-    buffer_ctx.buf_len = statbuf.st_size;
-
     /* Load file contents into buffer */
-    fread(buffer_ctx.buf, sizeof(uint8_t), statbuf.st_size, fp);
+    bytes_read = fread(buffer_ctx.buf, sizeof(uint8_t), buffer_ctx.buf_len, fp);
+    if (bytes_read != buffer_ctx.buf_len)
+    {
+        fclose(fp);
+        return 1;
+    }
 
     fclose(fp);
 
