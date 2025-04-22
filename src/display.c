@@ -23,6 +23,7 @@
  ******************************************************************************/
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "display.h"
@@ -46,7 +47,8 @@ void display_draw(void)
     printf("%s", CLR);
     printf("%s", HEADER);
 
-    while (addr < 0x200) /* TODO: Use terminal height to determine this. */
+    /* TODO: Use terminal height to determine this. */
+    while ((addr < 0x200) && (addr < buffer_ctx.buf_len))
     {
         memset(ascii, '\0', ASCII_STR_LEN);
 
@@ -56,12 +58,27 @@ void display_draw(void)
         /* Print bytes */
         for(uint8_t i = 0; i < 16; i++)
         {
-            printf("%02X", buff[addr + i]);
+            /* Flag to indicate no ASCII should be printed for this byte. */
+            bool no_ascii = false;
+
+            if ((addr + i) < buffer_ctx.buf_len)
+            {
+                printf("%02X", buff[addr + i]);
+            }
+            else
+            {
+                /* Don't try to print bytes beyond the length of the buffer. */
+                printf("  ");
+                no_ascii = true;
+            }
+
+            /* Print a space between pairs of bytes. */
             if((i % 2) == 1)
             {
                 printf(" ");
             }
 
+            if (no_ascii == false)
             {
                 char temp[2];
                 if ((buff[addr + i] > 0x1F) && (buff[addr + i] < 0x7F))
