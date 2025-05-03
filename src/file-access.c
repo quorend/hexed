@@ -91,6 +91,8 @@ void TestBufLen(CuTest *tc)
     stat(path, &st);
 
     CuAssertIntEquals(tc, st.st_size, buffer_ctx.buf_len);
+
+    return;
 }
 
 CuSuite *file_access_GetSuite()

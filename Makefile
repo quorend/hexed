@@ -5,7 +5,8 @@ build/CuTest.o \
 build/file-access.o \
 build/buffer.o \
 build/display.o \
-build/terminal.o
+build/terminal.o \
+build/input.o
 
 OBJBUILD = \
 build/main.o \
@@ -56,6 +57,9 @@ build/display.o: src/display.c src/display.h
 
 build/terminal.o: src/terminal.c src/terminal.h
 	$(CC) -o build/terminal.o -c src/terminal.c
+
+build/input.o: src/input.c src/input.h
+	$(CC) -o build/input.o -c src/input.c
 
 test/build/main.o: test/main.c
 	$(CC) -o test/build/main.o -c test/main.c

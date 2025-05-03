@@ -33,6 +33,8 @@
 #define HEADER "\e[0;33m            " \
     "0011 2233 4455 6677 8899 aabb ccdd eeff  " \
     "0123456789abcdef\e[0;0m\r\n"
+#define BYTE_HEX "%02X"
+#define BYTE_HEX_HIGHLIGHT "\e[41m%02X\e[m"
 #define ASCII_STR_LEN 17 /* 16 characters plus NULL character */
 
 void display_draw(void)
@@ -63,7 +65,14 @@ void display_draw(void)
 
             if ((addr + i) < buffer_ctx.buf_len)
             {
-                printf("%02X", buff[addr + i]);
+                if ((addr + i) != buffer_ctx.point.position)
+                {
+                    printf(BYTE_HEX, buff[addr + i]);
+                }
+                else
+                {
+                    printf(BYTE_HEX_HIGHLIGHT, buff[addr + i]);
+                }
             }
             else
             {

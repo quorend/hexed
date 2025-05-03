@@ -28,8 +28,8 @@
 
 #include "file-access.h"
 #include "buffer.h"
-#include "display.h"
 #include "terminal.h"
+#include "input.h"
 
 #define VERSION "1.0.0"
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
                 set_input_mode();
 
-                display_draw();
+                input_accept();
 
                 free(buffer_ctx.buf);
             }
