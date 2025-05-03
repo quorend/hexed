@@ -4,7 +4,8 @@ OBJCOMMON = \
 build/CuTest.o \
 build/file-access.o \
 build/buffer.o \
-build/display.o
+build/display.o \
+build/terminal.o
 
 OBJBUILD = \
 build/main.o \
@@ -52,6 +53,9 @@ build/buffer.o: src/buffer.c src/buffer.h
 
 build/display.o: src/display.c src/display.h
 	$(CC) -o build/display.o -c src/display.c
+
+build/terminal.o: src/terminal.c src/terminal.h
+	$(CC) -o build/terminal.o -c src/terminal.c
 
 test/build/main.o: test/main.c
 	$(CC) -o test/build/main.o -c test/main.c
