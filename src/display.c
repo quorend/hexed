@@ -29,7 +29,8 @@
 #include "display.h"
 #include "buffer.h"
 
-#define CLR "\e[1;1H\e[2J"
+#define HOME "\e[1;1H"
+#define CLR "\e[2J"
 #define HEADER "\e[0;33m            " \
     "0011 2233 4455 6677 8899 aabb ccdd eeff  " \
     "0123456789abcdef\e[0;0m\r\n"
@@ -45,8 +46,16 @@ void display_draw(void)
     uint8_t *buff = buffer_ctx.buf;
     /* A buffer to hold the current row's ascii representation for printing. */
     char ascii[ASCII_STR_LEN];
+    /* Only clear the screen the first time. This prevents flickering. */
+    static bool first_time = true;
 
-    printf("%s", CLR);
+    printf("%s", HOME);
+
+    if (first_time)
+    {
+        printf("%s", CLR);
+        first_time = false;
+    }
     printf("%s", HEADER);
 
     /* TODO: Use terminal height to determine this. */
