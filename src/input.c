@@ -38,13 +38,52 @@ void input_accept(void)
     {
         read(STDIN_FILENO, &c, 1);
 
-        if (c == '\004') /* C-d */
+        if (c == '\033') /* ESC character */
+        {
+            read(STDIN_FILENO, &c, 1);
+            if (c == '[')
+            {
+                read(STDIN_FILENO, &c, 1);
+                switch (c)
+                {
+                case 'A': /* UP arrow */
+                    if (buffer_getPosition() > 0xF)
+                    {
+                        buffer_ctx.point.position = buffer_getPosition() - 0x10;
+                    }
+                    break;
+                case 'B': /* DOWN arrow */
+                    if (buffer_getPosition() < buffer_ctx.buf_len - 0x10)
+                    {
+                        buffer_ctx.point.position = buffer_getPosition() + 0x10;
+                    }
+                    break;
+                case 'C': /* RIGHT arrow */
+                    if (buffer_getPosition() < buffer_ctx.buf_len - 1)
+                    {
+                        buffer_ctx.point.position++;
+                    }
+                    break;
+                case 'D': /* LEFT arrow */
+                    if (buffer_getPosition() > 0)
+                    {
+                        buffer_ctx.point.position--;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            display_draw();
+        }
+        else if (c == '\004') /* C-d */
         {
             break;
         }
         else
         {
-            buffer_ctx.buf[buffer_ctx.point.position] = c;
+            buffer_ctx.buf[buffer_getPosition()] = c;
             display_draw();
         }
     }

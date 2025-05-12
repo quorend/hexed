@@ -74,7 +74,7 @@ void display_draw(void)
 
             if ((addr + i) < buffer_ctx.buf_len)
             {
-                if ((addr + i) != buffer_ctx.point.position)
+                if ((addr + i) != buffer_getPosition())
                 {
                     printf(BYTE_HEX, buff[addr + i]);
                 }
