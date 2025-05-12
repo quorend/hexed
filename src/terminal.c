@@ -37,7 +37,7 @@ void set_input_mode(void)
 
     /* Set the funny terminal modes. */
     tcgetattr(STDIN_FILENO, &tattr);
-    tattr.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
+    tattr.c_lflag &= (unsigned)~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tattr.c_cc[VMIN] = 1;
     tattr.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr);

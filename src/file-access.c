@@ -54,7 +54,7 @@ int file_access_loadFile(const char *path)
 
     /* Get file stats (filesize) */
     fstat(file_desc, &statbuf);
-    buffer_ctx.buf_len = statbuf.st_size;
+    buffer_ctx.buf_len = (size_t)statbuf.st_size;
 
     /* Allocate memory for buffer */
     buffer_ctx.buf = malloc(buffer_ctx.buf_len);
@@ -90,7 +90,7 @@ void TestBufLen(CuTest *tc)
 
     stat(path, &st);
 
-    CuAssertIntEquals(tc, st.st_size, buffer_ctx.buf_len);
+    CuAssertULongEquals(tc, (size_t)st.st_size, buffer_ctx.buf_len);
 
     return;
 }
