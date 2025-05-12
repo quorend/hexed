@@ -26,8 +26,6 @@ extern struct Buffer_Ctx buffer_ctx;
 
 void buffer_init(void);
 
-void buffer_allocBuffer(void);
-
 uint64_t buffer_getPosition(void);
 
 #endif /* __BUFFER_H__ */
