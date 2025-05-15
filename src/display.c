@@ -36,6 +36,8 @@
     "0123456789abcdef\e[0;0m\r\n"
 #define BYTE_HEX "%02X"
 #define BYTE_HEX_HIGHLIGHT "\e[41m%02X\e[m"
+#define BYTE_CHAR "%c"
+#define BYTE_CHAR_HIGHLIGHT "\e[41m%c\e[m"
 #define ASCII_STR_LEN 17 /* 16 characters plus NULL character */
 
 void display_draw(void)
@@ -113,7 +115,23 @@ void display_draw(void)
         }
 
         /* Print ASCII */
-        printf(" %s\r\n", ascii);
+        for (uint8_t i = 0; ascii[i] != '\0'; i++)
+        {
+            if (i > 0xF)
+            {
+                break;
+            }
+
+            if ((addr + i) != buffer_getPosition())
+            {
+                printf(BYTE_CHAR, ascii[i]);
+            }
+            else
+            {
+                printf(BYTE_CHAR_HIGHLIGHT, ascii[i]);
+            }
+        }
+        printf("\r\n");
 
         addr += 0x10;
     }
