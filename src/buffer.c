@@ -30,12 +30,12 @@ void buffer_init(void)
 {
     buffer_ctx.buf = NULL;
     buffer_ctx.first_row = 0;
-    buffer_ctx.point.position = 0;
+    buffer_ctx.point_pos = 0;
 
     return;
 }
 
 uint64_t buffer_getPosition(void)
 {
-    return buffer_ctx.point.position;
+    return buffer_ctx.point_pos;
 }

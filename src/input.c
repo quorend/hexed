@@ -49,25 +49,25 @@ void input_accept(void)
                 case 'A': /* UP arrow */
                     if (buffer_getPosition() > 0xF)
                     {
-                        buffer_ctx.point.position = buffer_getPosition() - 0x10;
+                        buffer_ctx.point_pos -= 0x10;
                     }
                     break;
                 case 'B': /* DOWN arrow */
                     if (buffer_getPosition() < buffer_ctx.buf_len - 0x10)
                     {
-                        buffer_ctx.point.position = buffer_getPosition() + 0x10;
+                        buffer_ctx.point_pos += 0x10;
                     }
                     break;
                 case 'C': /* RIGHT arrow */
                     if (buffer_getPosition() < buffer_ctx.buf_len - 1)
                     {
-                        buffer_ctx.point.position++;
+                        buffer_ctx.point_pos++;
                     }
                     break;
                 case 'D': /* LEFT arrow */
                     if (buffer_getPosition() > 0)
                     {
-                        buffer_ctx.point.position--;
+                        buffer_ctx.point_pos--;
                     }
                     break;
                 default:

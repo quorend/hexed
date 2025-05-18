@@ -13,9 +13,7 @@ struct Buffer_Ctx {
     /* Determine which address to show at the top of the address frame */
     size_t first_row;
 
-    struct {
-        uint64_t position;
-    } point;
+    uint64_t point_pos;
     
 };
 
