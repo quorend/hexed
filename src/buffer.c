@@ -29,6 +29,7 @@ struct Buffer_Ctx buffer_ctx;
 void buffer_init(void)
 {
     buffer_ctx.buf = NULL;
+    buffer_ctx.first_row = 0;
     buffer_ctx.point.position = 0;
 
     return;

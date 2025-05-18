@@ -42,7 +42,7 @@
 void display_draw(bool clear)
 {
     /* Used for printing the hex byte counts in the left column. */
-    size_t addr = buffer_ctx.window.first_row;
+    size_t addr = buffer_ctx.first_row;
     /* A pointer to the buffer that holds the file contents. */
     uint8_t *buff = buffer_ctx.buf;
     /* A buffer to hold the current row's ascii representation for printing. */

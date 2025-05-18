@@ -4,17 +4,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
-struct Buffer_Ctx{
+struct Buffer_Ctx {
     /* Buffer contents */
     uint8_t *buf;
+    /* Number of bytes in buffer */
     size_t buf_len;
 
-    struct {
-        /* Determine which address to show at the top of the address frame */
-        size_t first_row;
-        /* Determine which byte to show first in the byte frame */
-        uint8_t *first_byte;
-    } window;
+    /* Determine which address to show at the top of the address frame */
+    size_t first_row;
 
     struct {
         uint64_t position;
