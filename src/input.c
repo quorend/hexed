@@ -32,7 +32,7 @@ void input_accept(void)
 {
     unsigned char c;
 
-    display_draw();
+    display_draw(true);
 
     while (1)
     {
@@ -75,7 +75,7 @@ void input_accept(void)
                 }
             }
 
-            display_draw();
+            display_draw(false);
         }
         else if (c == '\004') /* C-d */
         {
@@ -84,7 +84,7 @@ void input_accept(void)
         else
         {
             buffer_ctx.buf[buffer_getPosition()] = c;
-            display_draw();
+            display_draw(false);
         }
     }
 

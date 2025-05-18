@@ -23,7 +23,6 @@
  ******************************************************************************/
 
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include "display.h"
@@ -40,7 +39,7 @@
 #define BYTE_CHAR_HIGHLIGHT "\e[41m%c\e[m"
 #define ASCII_STR_LEN 17 /* 16 characters plus NULL character */
 
-void display_draw(void)
+void display_draw(bool clear)
 {
     /* Used for printing the hex byte counts in the left column. */
     size_t addr = buffer_ctx.window.first_row;
@@ -48,15 +47,12 @@ void display_draw(void)
     uint8_t *buff = buffer_ctx.buf;
     /* A buffer to hold the current row's ascii representation for printing. */
     char ascii[ASCII_STR_LEN];
-    /* Only clear the screen the first time. This prevents flickering. */
-    static bool first_time = true;
 
     printf("%s", HOME);
 
-    if (first_time)
+    if (clear)
     {
         printf("%s", CLR);
-        first_time = false;
     }
     printf("%s", HEADER);
 
