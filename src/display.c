@@ -26,7 +26,6 @@
 #include <string.h>
 
 #include "display.h"
-#include "buffer.h"
 
 #define HOME "\e[1;1H"
 #define CLR "\e[2J"
@@ -39,12 +38,12 @@
 #define BYTE_CHAR_HIGHLIGHT "\e[41m%c\e[m"
 #define ASCII_STR_LEN 17 /* 16 characters plus NULL character */
 
-void display_draw(bool clear)
+void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 {
     /* Used for printing the hex byte counts in the left column. */
-    size_t addr = buffer_ctx.first_row;
+    size_t addr = buffer_ctx->first_row;
     /* A pointer to the buffer that holds the file contents. */
-    uint8_t *buff = buffer_ctx.buf;
+    uint8_t *buff = buffer_ctx->buf;
     /* A buffer to hold the current row's ascii representation for printing. */
     char ascii[ASCII_STR_LEN];
 
@@ -57,7 +56,7 @@ void display_draw(bool clear)
     printf("%s", HEADER);
 
     /* TODO: Use terminal height to determine this. */
-    while ((addr < 0x200) && (addr < buffer_ctx.buf_len))
+    while ((addr < 0x200) && (addr < buffer_ctx->buf_len))
     {
         memset(ascii, '\0', ASCII_STR_LEN);
 
@@ -70,9 +69,9 @@ void display_draw(bool clear)
             /* Flag to indicate no ASCII should be printed for this byte. */
             bool no_ascii = false;
 
-            if ((addr + i) < buffer_ctx.buf_len)
+            if ((addr + i) < buffer_ctx->buf_len)
             {
-                if ((addr + i) != buffer_getPosition())
+                if ((addr + i) != buffer_getPosition(buffer_ctx))
                 {
                     printf(BYTE_HEX, buff[addr + i]);
                 }
@@ -118,7 +117,7 @@ void display_draw(bool clear)
                 break;
             }
 
-            if ((addr + i) != buffer_getPosition())
+            if ((addr + i) != buffer_getPosition(buffer_ctx))
             {
                 printf(BYTE_CHAR, ascii[i]);
             }

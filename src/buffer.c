@@ -24,18 +24,16 @@
 
 #include "buffer.h"
 
-struct Buffer_Ctx buffer_ctx;
-
-void buffer_init(void)
+void buffer_init(struct Buffer_Ctx *buffer_ctx)
 {
-    buffer_ctx.buf = NULL;
-    buffer_ctx.first_row = 0;
-    buffer_ctx.point_pos = 0;
+    buffer_ctx->buf = NULL;
+    buffer_ctx->first_row = 0;
+    buffer_ctx->point_pos = 0;
 
     return;
 }
 
-uint64_t buffer_getPosition(void)
+uint64_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx)
 {
-    return buffer_ctx.point_pos;
+    return buffer_ctx->point_pos;
 }

@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
-void display_draw(bool clear);
+#include "buffer.h"
+
+void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear);
 
 #endif /* __DISPLAY_H__ */

@@ -26,13 +26,12 @@
 
 #include "input.h"
 #include "display.h"
-#include "buffer.h"
 
-void input_accept(void)
+void input_accept(struct Buffer_Ctx *buffer_ctx)
 {
     unsigned char c;
 
-    display_draw(true);
+    display_draw(buffer_ctx, true);
 
     while (1)
     {
@@ -47,27 +46,27 @@ void input_accept(void)
                 switch (c)
                 {
                 case 'A': /* UP arrow */
-                    if (buffer_getPosition() > 0xF)
+                    if (buffer_getPosition(buffer_ctx) > 0xF)
                     {
-                        buffer_ctx.point_pos -= 0x10;
+                        buffer_ctx->point_pos -= 0x10;
                     }
                     break;
                 case 'B': /* DOWN arrow */
-                    if (buffer_getPosition() < buffer_ctx.buf_len - 0x10)
+                    if (buffer_getPosition(buffer_ctx) < buffer_ctx->buf_len - 0x10)
                     {
-                        buffer_ctx.point_pos += 0x10;
+                        buffer_ctx->point_pos += 0x10;
                     }
                     break;
                 case 'C': /* RIGHT arrow */
-                    if (buffer_getPosition() < buffer_ctx.buf_len - 1)
+                    if (buffer_getPosition(buffer_ctx) < buffer_ctx->buf_len - 1)
                     {
-                        buffer_ctx.point_pos++;
+                        buffer_ctx->point_pos++;
                     }
                     break;
                 case 'D': /* LEFT arrow */
-                    if (buffer_getPosition() > 0)
+                    if (buffer_getPosition(buffer_ctx) > 0)
                     {
-                        buffer_ctx.point_pos--;
+                        buffer_ctx->point_pos--;
                     }
                     break;
                 default:
@@ -75,7 +74,7 @@ void input_accept(void)
                 }
             }
 
-            display_draw(false);
+            display_draw(buffer_ctx, false);
         }
         else if (c == '\004') /* C-d */
         {
@@ -83,8 +82,8 @@ void input_accept(void)
         }
         else
         {
-            buffer_ctx.buf[buffer_getPosition()] = c;
-            display_draw(false);
+            buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
+            display_draw(buffer_ctx, false);
         }
     }
 

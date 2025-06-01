@@ -17,10 +17,8 @@ struct Buffer_Ctx {
     
 };
 
-extern struct Buffer_Ctx buffer_ctx;
+void buffer_init(struct Buffer_Ctx *buffer_ctx);
 
-void buffer_init(void);
-
-uint64_t buffer_getPosition(void);
+uint64_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx);
 
 #endif /* __BUFFER_H__ */

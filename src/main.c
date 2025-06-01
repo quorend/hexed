@@ -74,11 +74,12 @@ int main(int argc, char *argv[])
             else
             {
                 /* Filename */
+                struct Buffer_Ctx buffer_ctx;
                 int rc = 0;
 
-                buffer_init();
+                buffer_init(&buffer_ctx);
 
-                rc = file_access_loadFile(argv[1]);
+                rc = file_access_loadFile(&buffer_ctx, argv[1]);
                 if (rc)
                 {
                     printf("ERR: file_access_loadFile()\r\n");
@@ -87,7 +88,7 @@ int main(int argc, char *argv[])
 
                 set_input_mode();
 
-                input_accept();
+                input_accept(&buffer_ctx);
 
                 free(buffer_ctx.buf);
             }

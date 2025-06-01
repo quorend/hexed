@@ -28,9 +28,8 @@
 
 #include "file-access.h"
 #include "cutest/CuTest.h"
-#include "buffer.h"
 
-int file_access_loadFile(const char *path)
+int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
 {
     FILE *fp;
     struct stat statbuf;
@@ -54,19 +53,19 @@ int file_access_loadFile(const char *path)
 
     /* Get file stats (filesize) */
     fstat(file_desc, &statbuf);
-    buffer_ctx.buf_len = (size_t)statbuf.st_size;
+    buffer_ctx->buf_len = (size_t)statbuf.st_size;
 
     /* Allocate memory for buffer */
-    buffer_ctx.buf = malloc(buffer_ctx.buf_len);
-    if (buffer_ctx.buf == NULL)
+    buffer_ctx->buf = malloc(buffer_ctx->buf_len);
+    if (buffer_ctx->buf == NULL)
     {
         fclose(fp);
         return 1;
     }
 
     /* Load file contents into buffer */
-    bytes_read = fread(buffer_ctx.buf, sizeof(uint8_t), buffer_ctx.buf_len, fp);
-    if (bytes_read != buffer_ctx.buf_len)
+    bytes_read = fread(buffer_ctx->buf, sizeof(uint8_t), buffer_ctx->buf_len, fp);
+    if (bytes_read != buffer_ctx->buf_len)
     {
         fclose(fp);
         return 1;
@@ -81,8 +80,11 @@ void TestBufLen(CuTest *tc)
 {
     struct stat st;
     const char path[] = "src/main.c";
+    struct Buffer_Ctx buffer_ctx;
 
-    if (file_access_loadFile(path))
+    buffer_init(&buffer_ctx);
+
+    if (file_access_loadFile(&buffer_ctx, path))
     {
         CuFail(tc, "Failed to load file");
         return;
