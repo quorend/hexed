@@ -27,7 +27,7 @@
 #include "input.h"
 #include "display.h"
 
-void input_accept(struct Buffer_Ctx *buffer_ctx)
+void input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
     unsigned char c;
 
@@ -35,14 +35,14 @@ void input_accept(struct Buffer_Ctx *buffer_ctx)
 
     while (1)
     {
-        read(STDIN_FILENO, &c, 1);
+        read(fd, &c, 1);
 
         if (c == '\033') /* ESC character */
         {
-            read(STDIN_FILENO, &c, 1);
+            read(fd, &c, 1);
             if (c == '[')
             {
-                read(STDIN_FILENO, &c, 1);
+                read(fd, &c, 1);
                 switch (c)
                 {
                 case 'A': /* UP arrow */

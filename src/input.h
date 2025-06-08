@@ -3,6 +3,6 @@
 
 #include "buffer.h"
 
-void input_accept(struct Buffer_Ctx *buffer_ctx);
+void input_accept(struct Buffer_Ctx *buffer_ctx, int fd);
 
 #endif /* __INPUT_H__ */

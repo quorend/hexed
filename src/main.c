@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "file-access.h"
 #include "buffer.h"
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
 
                 set_input_mode();
 
-                input_accept(&buffer_ctx);
+                input_accept(&buffer_ctx, STDIN_FILENO);
 
                 free(buffer_ctx.buf);
             }
