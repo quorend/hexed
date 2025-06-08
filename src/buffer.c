@@ -39,7 +39,7 @@ uint64_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx)
     return buffer_ctx->point_pos;
 }
 
-void TestBufInit(CuTest *tc)
+static void TestBufInit(CuTest *tc)
 {
     struct Buffer_Ctx buffer_ctx;
 

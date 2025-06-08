@@ -76,7 +76,7 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
     return 0;
 }
 
-void TestBufLen(CuTest *tc)
+static void TestBufLen(CuTest *tc)
 {
     struct stat st;
     const char path[] = "src/main.c";
