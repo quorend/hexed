@@ -23,6 +23,7 @@
  ******************************************************************************/
 
 #include "buffer.h"
+#include "cutest/CuTest.h"
 
 void buffer_init(struct Buffer_Ctx *buffer_ctx)
 {
@@ -36,4 +37,24 @@ void buffer_init(struct Buffer_Ctx *buffer_ctx)
 uint64_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx)
 {
     return buffer_ctx->point_pos;
+}
+
+void TestBufInit(CuTest *tc)
+{
+    struct Buffer_Ctx buffer_ctx;
+
+    buffer_init(&buffer_ctx);
+
+    CuAssertPtrEquals(tc, NULL, buffer_ctx.buf);
+    CuAssertULongEquals(tc, 0, buffer_ctx.first_row);
+    CuAssertULongEquals(tc, 0, buffer_ctx.point_pos);
+
+    return;
+}
+
+CuSuite *buffer_GetSuite(void)
+{
+    CuSuite *suite = CuSuiteNew();
+    SUITE_ADD_TEST(suite, TestBufInit);
+    return suite;
 }
