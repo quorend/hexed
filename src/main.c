@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
                 buffer_init(&buffer_ctx);
 
                 rc = file_access_loadFile(&buffer_ctx, argv[1]);
-                if (rc)
+                if (rc != 0)
                 {
                     printf("ERR: file_access_loadFile()\r\n");
                     return 0;

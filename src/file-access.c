@@ -32,6 +32,7 @@
 int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
 {
     FILE *fp;
+    int rc = 0;
     struct stat statbuf;
     size_t bytes_read = 0;
 
@@ -39,7 +40,8 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
     fp = fopen(path, "r");
     if (!fp)
     {
-        return 1;
+        rc = 1;
+        goto __exit__;
     }
 
     /* Get file stats (filesize) */
@@ -50,21 +52,23 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
     buffer_ctx->buf = malloc(buffer_ctx->buf_len);
     if (buffer_ctx->buf == NULL)
     {
-        fclose(fp);
-        return 1;
+        rc = 2;
+        goto __fclose__;
     }
 
     /* Load file contents into buffer */
     bytes_read = fread(buffer_ctx->buf, sizeof(uint8_t), buffer_ctx->buf_len, fp);
     if (bytes_read != buffer_ctx->buf_len)
     {
-        fclose(fp);
-        return 1;
+        free(buffer_ctx->buf);
+        rc = 3;
+        goto __fclose__;
     }
 
+__fclose__:
     fclose(fp);
-
-    return 0;
+__exit__:
+    return rc;
 }
 
 static void TestBufLen(CuTest *tc)
@@ -75,7 +79,7 @@ static void TestBufLen(CuTest *tc)
 
     buffer_init(&buffer_ctx);
 
-    if (file_access_loadFile(&buffer_ctx, path))
+    if (file_access_loadFile(&buffer_ctx, path) != 0)
     {
         CuFail(tc, "Failed to load file");
         return;

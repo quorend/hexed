@@ -30,6 +30,7 @@ static void RunAllTests(void);
 
 CuSuite *file_access_GetSuite(void);
 CuSuite *buffer_GetSuite(void);
+CuSuite *input_GetSuite(void);
 
 int main(void)
 {
@@ -45,6 +46,7 @@ static void RunAllTests(void)
 
     CuSuiteAddSuite(suite, file_access_GetSuite());
     CuSuiteAddSuite(suite, buffer_GetSuite());
+    CuSuiteAddSuite(suite, input_GetSuite());
 
     CuSuiteRun(suite);
     CuSuiteSummary(suite, output);

@@ -23,9 +23,13 @@
  ******************************************************************************/
 
 #include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
 
 #include "input.h"
 #include "display.h"
+#include "file-access.h"
+#include "cutest/CuTest.h"
 
 void input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
@@ -33,7 +37,7 @@ void input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 
     display_draw(buffer_ctx, true);
 
-    while (1)
+    while (buffer_ctx->buf != NULL)
     {
         read(fd, &c, 1);
 
@@ -88,4 +92,51 @@ void input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
     }
 
     return;
+}
+
+static void TestInputAcc(CuTest *tc)
+{
+    struct Buffer_Ctx buffer_ctx;
+    int fd;
+    int rc = 0;
+
+    fd = open("test/input-simple", O_RDONLY);
+    if (fd == -1)
+    {
+        CuFail(tc, "Failed to open input file.");
+        goto __exit__;
+    }
+
+    buffer_init(&buffer_ctx);
+
+    rc = file_access_loadFile(&buffer_ctx, "src/main.c");
+    if (rc != 0)
+    {
+        CuFail(tc, "Failed to load file.");
+        goto __close_file__;
+    }
+
+    input_accept(&buffer_ctx, fd);
+
+    /* Add CuAssert functions here */
+    CuAssertULongEquals(tc, 0, buffer_ctx.point_pos);
+    /* TODO: Also test buffer_ctx.first_row */
+
+    free(buffer_ctx.buf);
+
+__close_file__:
+    if (close(fd) == -1)
+    {
+        CuFail(tc, "Failed to close file descriptor.");
+    }
+
+__exit__:
+    return;
+}
+
+CuSuite *input_GetSuite(void)
+{
+    CuSuite *suite = CuSuiteNew();
+    SUITE_ADD_TEST(suite, TestInputAcc);
+    return suite;
 }
