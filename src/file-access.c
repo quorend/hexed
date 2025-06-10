@@ -33,7 +33,6 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
 {
     FILE *fp;
     struct stat statbuf;
-    int file_desc;
     size_t bytes_read = 0;
 
     /* Open file */
@@ -43,16 +42,8 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
         return 1;
     }
 
-    /* Get file descriptor */
-    file_desc = fileno(fp);
-    if (file_desc == -1)
-    {
-        fclose(fp);
-        return 1;
-    }
-
     /* Get file stats (filesize) */
-    fstat(file_desc, &statbuf);
+    stat(path, &statbuf);
     buffer_ctx->buf_len = (size_t)statbuf.st_size;
 
     /* Allocate memory for buffer */
