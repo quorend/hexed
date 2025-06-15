@@ -13,7 +13,7 @@
 /* Use this variable to remember original terminal attributes. */
 struct termios saved_attributes;
 
-void reset_input_mode(void)
+static void reset_input_mode(void)
 {
     tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
 
