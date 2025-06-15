@@ -71,6 +71,10 @@ __exit__:
     return rc;
 }
 
+/*
+ * Unit Tests
+ */
+
 static void TestBufLen(CuTest *tc)
 {
     struct stat st;

@@ -94,6 +94,10 @@ void input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
     return;
 }
 
+/*
+ * Unit Tests
+ */
+
 static void TestInputAcc(CuTest *tc)
 {
     struct Buffer_Ctx buffer_ctx;
