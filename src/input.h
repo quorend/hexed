@@ -8,8 +8,8 @@
  *        read.
  * @param[in,out] buffer_ctx buffer context structure
  * @param[in] fd file descriptor to read input from (typically stdin)
- * @return void
+ * @return 0 on success, or errno on read() error
  */
-void input_accept(struct Buffer_Ctx *buffer_ctx, int fd);
+int input_accept(struct Buffer_Ctx *buffer_ctx, int fd);
 
 #endif /* __INPUT_H__ */

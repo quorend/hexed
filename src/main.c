@@ -89,7 +89,11 @@ int main(int argc, char *argv[])
 
                 set_input_mode();
 
-                input_accept(&buffer_ctx, STDIN_FILENO);
+                rc = input_accept(&buffer_ctx, STDIN_FILENO);
+                if (rc != 0)
+                {
+                    printf("ERR: input_accept(): %s\r\n", strerror(rc));
+                }
 
                 free(buffer_ctx.buf);
             }

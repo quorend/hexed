@@ -49,7 +49,7 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 
     printf("%s", HOME);
 
-    if (clear)
+    if (clear == true)
     {
         printf("%s", CLR);
     }

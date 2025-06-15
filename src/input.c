@@ -25,28 +25,47 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "input.h"
 #include "display.h"
 #include "file-access.h"
 #include "cutest/CuTest.h"
 
-void input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
+#define check_ec() \
+do\
+{\
+    if (ec == -1)\
+    {\
+        rc = errno;\
+        break;\
+    }\
+}\
+while(0)
+
+int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
-    unsigned char c;
+    unsigned char c = '\0';
+    ssize_t ec = 0;
+    int rc = 0;
 
     display_draw(buffer_ctx, true);
 
     while (buffer_ctx->buf != NULL)
     {
-        read(fd, &c, 1);
+        ec = read(fd, &c, 1);
+        check_ec();
 
         if (c == '\033') /* ESC character */
         {
-            read(fd, &c, 1);
+            ec = read(fd, &c, 1);
+            check_ec();
+
             if (c == '[')
             {
-                read(fd, &c, 1);
+                ec = read(fd, &c, 1);
+                check_ec();
+
                 switch (c)
                 {
                 case 'A': /* UP arrow */
@@ -89,9 +108,10 @@ void input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
             buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
             display_draw(buffer_ctx, false);
         }
+
     }
 
-    return;
+    return rc;
 }
 
 /*
