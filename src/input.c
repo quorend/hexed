@@ -118,48 +118,78 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
  * Unit Tests
  */
 
-static void TestInputAcc(CuTest *tc)
+/**
+ * @brief Common setup code for input_accept() tests.
+ * @param[in] command_input quoted path to command input file
+ * @param[in] buffer_input quoted path to buffer input file
+ */
+#define INPUT_TEST_SETUP(command_input, buffer_input) \
+struct Buffer_Ctx buffer_ctx;\
+int fd;\
+int rc = 0;\
+\
+do\
+{\
+    fd = open(command_input, O_RDONLY);\
+    if (fd == -1)\
+    {\
+        CuFail(tc, "Failed to open input file.");\
+        goto __exit__;\
+    }\
+\
+    buffer_init(&buffer_ctx);\
+\
+    rc = file_access_loadFile(&buffer_ctx, buffer_input);\
+    if (rc != 0)\
+    {\
+        CuFail(tc, "Failed to load file.");\
+        goto __close_file__;\
+    }\
+\
+    input_accept(&buffer_ctx, fd);\
+\
+}\
+while(0)
+
+/**
+ * @brief Common teardown code for input_accept() tests.
+ */
+#define INPUT_TEST_TEARDOWN \
+do\
+{\
+    free(buffer_ctx.buf);\
+\
+__close_file__:\
+    if (close(fd) == -1)\
+    {\
+        CuFail(tc, "Failed to close file descriptor.");\
+    }\
+\
+__exit__:\
+}\
+while(0)
+
+static void TestInputAcc_simple(CuTest *tc)
 {
-    struct Buffer_Ctx buffer_ctx;
-    int fd;
-    int rc = 0;
+    /*
+     * This command file has a single ASCII 'o' and then the program termination
+     * byte. Thus, neither point_pos nor first_row should change from their
+     * initial values.
+     */
 
-    fd = open("test/input-simple", O_RDONLY);
-    if (fd == -1)
-    {
-        CuFail(tc, "Failed to open input file.");
-        goto __exit__;
-    }
-
-    buffer_init(&buffer_ctx);
-
-    rc = file_access_loadFile(&buffer_ctx, "src/main.c");
-    if (rc != 0)
-    {
-        CuFail(tc, "Failed to load file.");
-        goto __close_file__;
-    }
-
-    input_accept(&buffer_ctx, fd);
+    INPUT_TEST_SETUP("test/input-simple", "src/main.c");
 
     CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
     CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
 
-    free(buffer_ctx.buf);
+    INPUT_TEST_TEARDOWN;
 
-__close_file__:
-    if (close(fd) == -1)
-    {
-        CuFail(tc, "Failed to close file descriptor.");
-    }
-
-__exit__:
     return;
 }
 
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
-    SUITE_ADD_TEST(suite, TestInputAcc);
+    SUITE_ADD_TEST(suite, TestInputAcc_simple);
     return suite;
 }
