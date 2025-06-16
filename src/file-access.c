@@ -91,7 +91,7 @@ static void TestBufLen(CuTest *tc)
 
     stat(path, &st);
 
-    CuAssertULongEquals(tc, (size_t)st.st_size, buffer_ctx.buf_len);
+    CuAssertSizetEquals(tc, (size_t)st.st_size, buffer_ctx.buf_len);
 
     return;
 }

@@ -34,7 +34,7 @@ void buffer_init(struct Buffer_Ctx *buffer_ctx)
     return;
 }
 
-uint64_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx)
+size_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx)
 {
     return buffer_ctx->point_pos;
 }
@@ -50,8 +50,8 @@ static void TestBufInit(CuTest *tc)
     buffer_init(&buffer_ctx);
 
     CuAssertPtrEquals(tc, NULL, buffer_ctx.buf);
-    CuAssertULongEquals(tc, 0, buffer_ctx.first_row);
-    CuAssertULongEquals(tc, 0, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
 
     return;
 }

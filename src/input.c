@@ -142,9 +142,8 @@ static void TestInputAcc(CuTest *tc)
 
     input_accept(&buffer_ctx, fd);
 
-    /* Add CuAssert functions here */
-    CuAssertULongEquals(tc, 0, buffer_ctx.point_pos);
-    /* TODO: Also test buffer_ctx.first_row */
+    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
 
     free(buffer_ctx.buf);
 

@@ -17,7 +17,7 @@ struct Buffer_Ctx {
     /* Determine which address to show at the top of the address frame */
     size_t first_row;
     /* Position of point as offset from the begining of buffer */
-    uint64_t point_pos;
+    size_t point_pos;
 };
 
 /**
@@ -32,6 +32,6 @@ void buffer_init(struct Buffer_Ctx *buffer_ctx);
  * @param[in] buffer_ctx buffer context structure
  * @return position of point as offset from the begining of buffer
  */
-uint64_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx);
+size_t buffer_getPosition(struct Buffer_Ctx *buffer_ctx);
 
 #endif /* __BUFFER_H__ */
