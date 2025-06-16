@@ -187,9 +187,29 @@ static void TestInputAcc_simple(CuTest *tc)
     return;
 }
 
+static void TestInputAcc_navRight1(CuTest *tc)
+{
+    /*
+     * This command file has ASCII characters interspersed among five <right>
+     * commands. The file ends with the program termination byte. Thus,
+     * point_pos should have the value 5 and first_row should retain its initial
+     * value.
+     */
+
+    INPUT_TEST_SETUP("test/input-navRight1", "src/main.c");
+
+    CuAssertSizetEquals(tc, 5, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
     SUITE_ADD_TEST(suite, TestInputAcc_simple);
+    SUITE_ADD_TEST(suite, TestInputAcc_navRight1);
     return suite;
 }
