@@ -177,7 +177,7 @@ static void TestInputAcc_simple(CuTest *tc)
      * initial values.
      */
 
-    INPUT_TEST_SETUP("test/input-simple", "src/main.c");
+    INPUT_TEST_SETUP("test/input-simple", "test/lorem-ipsum.txt");
 
     CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
     CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
@@ -196,7 +196,7 @@ static void TestInputAcc_navRight1(CuTest *tc)
      * value.
      */
 
-    INPUT_TEST_SETUP("test/input-navRight1", "src/main.c");
+    INPUT_TEST_SETUP("test/input-navRight1", "test/lorem-ipsum.txt");
 
     CuAssertSizetEquals(tc, 5, buffer_ctx.point_pos);
     CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
