@@ -5,11 +5,23 @@
 #include <stddef.h>
 
 /**
+ * @enum Mode
+ * @brief Enumeration of possible editing modes.
+ */
+enum Mode
+{
+    MODE_READ,
+    MODE_OVERWRITE,
+    MODE_INSERT,
+};
+
+/**
  * @struct Buffer_Ctx
  * @brief Contains context information about the buffer. This information is
  *        used e.g. for navigating and displaying the buffer.
  */
-struct Buffer_Ctx {
+struct Buffer_Ctx
+{
     /* Buffer contents */
     uint8_t *buf;
     /* Number of bytes in buffer */
@@ -18,6 +30,8 @@ struct Buffer_Ctx {
     size_t first_row;
     /* Position of point as offset from the begining of buffer */
     size_t point_pos;
+    /* Mode for editing buffer */
+    enum Mode mode;
 };
 
 /**

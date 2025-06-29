@@ -33,14 +33,14 @@
 #include "cutest/CuTest.h"
 
 #define check_ec() \
-do\
-{\
-    if (ec == -1)\
-    {\
-        rc = errno;\
-        break;\
-    }\
-}\
+do \
+{ \
+    if (ec == -1) \
+    { \
+        rc = errno; \
+        break; \
+    } \
+} \
 while(0)
 
 int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
@@ -99,14 +99,25 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 
             display_draw(buffer_ctx, false);
         }
-        else if (c == '\004') /* C-d */
+        else if (c == 0x04) /* C^D - Exit program */
         {
             break;
         }
+        else if (c == 0x12) /* C^R - Switch to MODE_READ */
+        {
+            buffer_ctx->mode = MODE_READ;
+        }
+        else if (c == 0x17) /* C^W - Switch to MODE_OVERWRITE */
+        {
+            buffer_ctx->mode = MODE_OVERWRITE;
+        }
         else
         {
-            buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
-            display_draw(buffer_ctx, false);
+            if (buffer_ctx->mode == MODE_OVERWRITE)
+            {
+                buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
+                display_draw(buffer_ctx, false);
+            }
         }
 
     }
@@ -124,49 +135,49 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
  * @param[in] buffer_input quoted path to buffer input file
  */
 #define INPUT_TEST_SETUP(command_input, buffer_input) \
-struct Buffer_Ctx buffer_ctx;\
-int fd;\
-int rc = 0;\
-\
-do\
-{\
-    fd = open(command_input, O_RDONLY);\
-    if (fd == -1)\
-    {\
-        CuFail(tc, "Failed to open input file.");\
-        goto __exit__;\
-    }\
-\
-    buffer_init(&buffer_ctx);\
-\
-    rc = file_access_loadFile(&buffer_ctx, buffer_input);\
-    if (rc != 0)\
-    {\
-        CuFail(tc, "Failed to load file.");\
-        goto __close_file__;\
-    }\
-\
-    input_accept(&buffer_ctx, fd);\
-\
-}\
+struct Buffer_Ctx buffer_ctx; \
+int fd; \
+int rc = 0; \
+ \
+do \
+{ \
+    fd = open(command_input, O_RDONLY); \
+    if (fd == -1) \
+    { \
+        CuFail(tc, "Failed to open input file."); \
+        goto __exit__; \
+    } \
+ \
+    buffer_init(&buffer_ctx); \
+ \
+    rc = file_access_loadFile(&buffer_ctx, buffer_input); \
+    if (rc != 0) \
+    { \
+        CuFail(tc, "Failed to load file."); \
+        goto __close_file__; \
+    } \
+ \
+    input_accept(&buffer_ctx, fd); \
+ \
+} \
 while(0)
 
 /**
  * @brief Common teardown code for input_accept() tests.
  */
 #define INPUT_TEST_TEARDOWN \
-do\
-{\
-    free(buffer_ctx.buf);\
-\
-__close_file__:\
-    if (close(fd) == -1)\
-    {\
-        CuFail(tc, "Failed to close file descriptor.");\
-    }\
-\
-__exit__:\
-}\
+do \
+{ \
+    free(buffer_ctx.buf); \
+ \
+__close_file__: \
+    if (close(fd) == -1) \
+    { \
+        CuFail(tc, "Failed to close file descriptor."); \
+    } \
+ \
+__exit__: \
+} \
 while(0)
 
 static void TestInputAcc_simple(CuTest *tc)

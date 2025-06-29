@@ -28,8 +28,10 @@
 void buffer_init(struct Buffer_Ctx *buffer_ctx)
 {
     buffer_ctx->buf = NULL;
+    buffer_ctx->buf_len = 0;
     buffer_ctx->first_row = 0;
     buffer_ctx->point_pos = 0;
+    buffer_ctx->mode = MODE_READ;
 
     return;
 }

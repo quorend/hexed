@@ -1,4 +1,4 @@
-CC = gcc -g -I lib -Wall -Werror -Wunused-parameter -Wconversion -Wsign-conversion
+CC = gcc -g -I lib -Wall -Werror -Wunused-parameter -Wconversion -Wsign-conversion -Wenum-conversion
 
 OBJCOMMON = \
 build/CuTest.o \
