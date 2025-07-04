@@ -106,10 +106,12 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
         else if (c == 0x12) /* C^R - Switch to MODE_READ */
         {
             buffer_ctx->mode = MODE_READ;
+            display_draw(buffer_ctx, false);
         }
         else if (c == 0x17) /* C^W - Switch to MODE_OVERWRITE */
         {
             buffer_ctx->mode = MODE_OVERWRITE;
+            display_draw(buffer_ctx, false);
         }
         else
         {

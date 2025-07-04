@@ -29,14 +29,25 @@
 
 #define HOME "\e[1;1H"
 #define CLR "\e[2J"
+#define RESET_COLORS "\e[0;0m"
+
 #define HEADER "\e[0;33m            " \
     "0011 2233 4455 6677 8899 aabb ccdd eeff  " \
     "0123456789abcdef\e[0;0m\r\n"
+
 #define BYTE_HEX "%02X"
 #define BYTE_HEX_HIGHLIGHT "\e[41m%02X\e[m"
 #define BYTE_CHAR "%c"
 #define BYTE_CHAR_HIGHLIGHT "\e[41m%c\e[m"
+
 #define ASCII_STR_LEN 17 /* 16 characters plus NULL character */
+
+#define MODE_R_0 "\e[33mR\e[m"
+#define MODE_R_1 "\e[41mR\e[m"
+#define MODE_E_0 "\e[33mE\e[m"
+#define MODE_E_1 "\e[41mE\e[m"
+#define MODE_W_0 "\e[33mW\e[m"
+#define MODE_W_1 "\e[41mW\e[m"
 
 void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 {
@@ -131,6 +142,12 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 
         addr += 0x10;
     }
+
+    /* Print footer */
+    printf(buffer_ctx->mode == MODE_OVERWRITE ? MODE_W_1 : MODE_W_0);
+    printf(buffer_ctx->mode == MODE_INSERT ? MODE_E_1 : MODE_E_0);
+    printf(buffer_ctx->mode == MODE_READ ? MODE_R_1 : MODE_R_0);
+    printf(RESET_COLORS "\r\n");
 
     return;
 }
