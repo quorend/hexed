@@ -110,6 +110,7 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
         }
 
         /* Print ASCII */
+        printf(" ");
         for (uint8_t i = 0; ascii[i] != '\0'; i++)
         {
             if (i > 0xF)
