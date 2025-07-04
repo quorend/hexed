@@ -113,11 +113,20 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
             buffer_ctx->mode = MODE_OVERWRITE;
             display_draw(buffer_ctx, false);
         }
+        else if (c == 0x01) /* C^A - Toggle advance feature */
+        {
+            buffer_ctx->advance = !(buffer_ctx->advance);
+            display_draw(buffer_ctx, false);
+        }
         else
         {
             if (buffer_ctx->mode == MODE_OVERWRITE)
             {
                 buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
+                if (buffer_ctx->advance == true)
+                {
+                    buffer_ctx->point_pos++;
+                }
                 display_draw(buffer_ctx, false);
             }
         }

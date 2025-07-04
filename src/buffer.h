@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 /**
  * @enum Mode
@@ -32,6 +33,8 @@ struct Buffer_Ctx
     size_t point_pos;
     /* Mode for editing buffer */
     enum Mode mode;
+    /* Advance point after overwriting */
+    bool advance;
 };
 
 /**

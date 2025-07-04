@@ -32,6 +32,7 @@ void buffer_init(struct Buffer_Ctx *buffer_ctx)
     buffer_ctx->first_row = 0;
     buffer_ctx->point_pos = 0;
     buffer_ctx->mode = MODE_READ;
+    buffer_ctx->advance = false;
 
     return;
 }

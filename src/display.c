@@ -48,6 +48,8 @@
 #define MODE_E_1 "\e[41mE\e[m"
 #define MODE_W_0 "\e[33mW\e[m"
 #define MODE_W_1 "\e[41mW\e[m"
+#define ADVANCE_0 " \e[33mA\e[m"
+#define ADVANCE_1 " \e[41mA\e[m"
 
 void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 {
@@ -147,6 +149,7 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
     printf(buffer_ctx->mode == MODE_OVERWRITE ? MODE_W_1 : MODE_W_0);
     printf(buffer_ctx->mode == MODE_INSERT ? MODE_E_1 : MODE_E_0);
     printf(buffer_ctx->mode == MODE_READ ? MODE_R_1 : MODE_R_0);
+    printf(buffer_ctx->advance == true ? ADVANCE_1 : ADVANCE_0);
     printf(RESET_COLORS "\r\n");
 
     return;
