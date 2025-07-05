@@ -255,11 +255,49 @@ static void TestInputAcc_navRight2(CuTest *tc)
     return;
 }
 
+static void TestInputAcc_navLeft1(CuTest *tc)
+{
+    /*
+     * This command file has one <left> command and ends with the program
+     * termination byte. Thus, point_pos should have the value 0 and first_row
+     * should retain its initial value.
+     */
+
+    INPUT_TEST_SETUP("test/input-navLeft1", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
+static void TestInputAcc_navLeft2(CuTest *tc)
+{
+    /*
+     * This command file has sixty-nine <left> commands and ends with the
+     * program termination byte. Thus, point_pos should have the value 0 and
+     * first_row should retain its initial value.
+     */
+
+    INPUT_TEST_SETUP("test/input-navLeft2", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
     SUITE_ADD_TEST(suite, TestInputAcc_simple);
     SUITE_ADD_TEST(suite, TestInputAcc_navRight1);
     SUITE_ADD_TEST(suite, TestInputAcc_navRight2);
+    SUITE_ADD_TEST(suite, TestInputAcc_navLeft1);
+    SUITE_ADD_TEST(suite, TestInputAcc_navLeft2);
     return suite;
 }
