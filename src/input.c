@@ -228,10 +228,38 @@ static void TestInputAcc_navRight1(CuTest *tc)
     return;
 }
 
+static void TestInputAcc_navRight2(CuTest *tc)
+{
+    /*
+     * This command file has fourty-two <right> commands. The file ends with the
+     * program termination byte. Thus, point_pos should have the value 42. If
+     * terminal height is large enough such that the first three rows of the
+     * file contents can be shown at once, first_row should retain its initial
+     * value.
+     */
+
+    INPUT_TEST_SETUP("test/input-navRight2", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 42, buffer_ctx.point_pos);
+
+    /* This should only be tested if the terminal height is large enough that
+     * the display does not need to scroll down.
+     */
+    if (1) /* TODO */
+    {
+        CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    }
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
     SUITE_ADD_TEST(suite, TestInputAcc_simple);
     SUITE_ADD_TEST(suite, TestInputAcc_navRight1);
+    SUITE_ADD_TEST(suite, TestInputAcc_navRight2);
     return suite;
 }
