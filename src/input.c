@@ -291,6 +291,50 @@ static void TestInputAcc_navLeft2(CuTest *tc)
     return;
 }
 
+static void TestInputAcc_navUp1(CuTest *tc)
+{
+    /*
+     * This command file has one <up> command and ends with the program
+     * termination byte. Thus, point_pos should have the value 0 and first_row
+     * should retain its initial value.
+     */
+
+    INPUT_TEST_SETUP("test/input-navUp1", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
+static void TestInputAcc_navDown1(CuTest *tc)
+{
+    /*
+     * This command file has one <down> command and ends with the program
+     * termination byte. Thus, point_pos should have the value 0x10. If
+     * terminal height is large enough such that the first two rows of the file
+     * contents can be shown at once, first_row should retain its initial value.
+     */
+
+    INPUT_TEST_SETUP("test/input-navDown1", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 0x10, buffer_ctx.point_pos);
+
+    /* This should only be tested if the terminal height is large enough that
+     * the display does not need to scroll down.
+     */
+    if (1) /* TODO */
+    {
+        CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    }
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
@@ -299,5 +343,7 @@ CuSuite *input_GetSuite(void)
     SUITE_ADD_TEST(suite, TestInputAcc_navRight2);
     SUITE_ADD_TEST(suite, TestInputAcc_navLeft1);
     SUITE_ADD_TEST(suite, TestInputAcc_navLeft2);
+    SUITE_ADD_TEST(suite, TestInputAcc_navUp1);
+    SUITE_ADD_TEST(suite, TestInputAcc_navDown1);
     return suite;
 }
