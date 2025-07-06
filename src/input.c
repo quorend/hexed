@@ -335,6 +335,50 @@ static void TestInputAcc_navDown1(CuTest *tc)
     return;
 }
 
+static void TestInputAcc_advance1(CuTest *tc)
+{
+    /*
+     * This command file enables MODE_OVERWRITE, toggles the advance setting
+     * (on), types one ASCII character, toggles the advance setting (off), types
+     * one ASCII character, and ends with the program termination byte. Thus,
+     * point_pos should have the value 1 and first_row should retain its initial
+     * value. The advance setting should be false.
+     */
+
+    INPUT_TEST_SETUP("test/input-advance1", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 1, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    CuAssertTrue(tc, !(buffer_ctx.advance));
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
+static void TestInputAcc_advance2(CuTest *tc)
+{
+    /*
+     * This command file enables MODE_OVERWRITE, toggles the advance setting
+     * (on), types three ASCII characters, toggles the advance setting (off),
+     * types three ASCII characters, sends three <right> commands, toggles the
+     * advance setting (on), types three ASCII characters, and ends with the
+     * program termination byte. Thus, point_pos should have the value 9 and
+     * first_row should retain its initial value. The advance setting should be
+     * true.
+     */
+
+    INPUT_TEST_SETUP("test/input-advance2", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 9, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    CuAssertTrue(tc, buffer_ctx.advance);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
@@ -345,5 +389,7 @@ CuSuite *input_GetSuite(void)
     SUITE_ADD_TEST(suite, TestInputAcc_navLeft2);
     SUITE_ADD_TEST(suite, TestInputAcc_navUp1);
     SUITE_ADD_TEST(suite, TestInputAcc_navDown1);
+    SUITE_ADD_TEST(suite, TestInputAcc_advance1);
+    SUITE_ADD_TEST(suite, TestInputAcc_advance2);
     return suite;
 }
