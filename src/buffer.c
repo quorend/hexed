@@ -33,6 +33,7 @@ void buffer_init(struct Buffer_Ctx *buffer_ctx)
     buffer_ctx->point_pos = 0;
     buffer_ctx->mode = MODE_READ;
     buffer_ctx->advance = false;
+    buffer_ctx->term_height = 32 + NONBUF_ROWS; /* TODO: Actually get height */
 
     return;
 }

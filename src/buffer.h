@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#define NONBUF_ROWS 3
+
 /**
  * @enum Mode
  * @brief Enumeration of possible editing modes.
@@ -35,6 +37,8 @@ struct Buffer_Ctx
     enum Mode mode;
     /* Advance point after overwriting */
     bool advance;
+    /* Number of rows in terminal */
+    volatile unsigned int term_height;
 };
 
 /**

@@ -54,11 +54,24 @@
 void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 {
     /* Used for printing the hex byte counts in the left column. */
-    size_t addr = buffer_ctx->first_row;
+    size_t addr;
     /* A pointer to the buffer that holds the file contents. */
     uint8_t *buff = buffer_ctx->buf;
     /* A buffer to hold the current row's ascii representation for printing. */
     char ascii[ASCII_STR_LEN];
+
+    /* Move first_row if needed to ensure that point will be visible */
+    while (buffer_ctx->point_pos >=
+           (buffer_ctx->first_row + (buffer_ctx->term_height - NONBUF_ROWS) * 0x10))
+    {
+        buffer_ctx->first_row += 0x10;
+    }
+    while (buffer_ctx->point_pos < buffer_ctx->first_row)
+    {
+        buffer_ctx->first_row -= 0x10;
+    }
+
+    addr = buffer_ctx->first_row;
 
     printf("%s", HOME);
 
@@ -68,8 +81,8 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
     }
     printf("%s", HEADER);
 
-    /* TODO: Use terminal height to determine this. */
-    while ((addr < 0x200) && (addr < buffer_ctx->buf_len))
+    while (((addr - buffer_ctx->first_row) / 0x10 < buffer_ctx->term_height - NONBUF_ROWS) &&
+           (addr < buffer_ctx->buf_len))
     {
         memset(ascii, '\0', ASCII_STR_LEN);
 
