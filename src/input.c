@@ -232,23 +232,17 @@ static void TestInputAcc_navRight2(CuTest *tc)
 {
     /*
      * This command file has fourty-two <right> commands. The file ends with the
-     * program termination byte. Thus, point_pos should have the value 42. If
-     * terminal height is large enough such that the first three rows of the
-     * file contents can be shown at once, first_row should retain its initial
-     * value.
+     * program termination byte. Thus, point_pos should have the value 42. The
+     * value of first_row will depend on the height of the terminal.
      */
 
     INPUT_TEST_SETUP("test/input-navRight2", "test/lorem-ipsum.txt");
 
     CuAssertSizetEquals(tc, 42, buffer_ctx.point_pos);
 
-    /* This should only be tested if the terminal height is large enough that
-     * the display does not need to scroll down.
-     */
-    if (1) /* TODO */
-    {
-        CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
-    }
+    size_t expected = buffer_ctx.term_height - NONBUF_ROWS >= 3 ? 0x0 :
+                     (buffer_ctx.term_height - NONBUF_ROWS == 2 ? 0x10 : 0x20);
+    CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -313,22 +307,16 @@ static void TestInputAcc_navDown1(CuTest *tc)
 {
     /*
      * This command file has one <down> command and ends with the program
-     * termination byte. Thus, point_pos should have the value 0x10. If
-     * terminal height is large enough such that the first two rows of the file
-     * contents can be shown at once, first_row should retain its initial value.
+     * termination byte. Thus, point_pos should have the value 0x10. The value
+     * of first_row will depend on the height of the terminal.
      */
 
     INPUT_TEST_SETUP("test/input-navDown1", "test/lorem-ipsum.txt");
 
     CuAssertSizetEquals(tc, 0x10, buffer_ctx.point_pos);
 
-    /* This should only be tested if the terminal height is large enough that
-     * the display does not need to scroll down.
-     */
-    if (1) /* TODO */
-    {
-        CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
-    }
+    size_t expected = buffer_ctx.term_height - NONBUF_ROWS >= 2 ? 0x0 : 0x10;
+    CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
 
     INPUT_TEST_TEARDOWN;
 

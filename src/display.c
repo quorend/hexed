@@ -62,7 +62,7 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 
     /* Move first_row if needed to ensure that point will be visible */
     while (buffer_ctx->point_pos >=
-           (buffer_ctx->first_row + (buffer_ctx->term_height - NONBUF_ROWS) * 0x10))
+           (buffer_ctx->first_row + (BUF_HEIGHT * 0x10)))
     {
         buffer_ctx->first_row += 0x10;
     }
@@ -81,7 +81,7 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
     }
     printf("%s", HEADER);
 
-    while (((addr - buffer_ctx->first_row) / 0x10 < buffer_ctx->term_height - NONBUF_ROWS) &&
+    while (((addr - buffer_ctx->first_row) / 0x10 < BUF_HEIGHT) &&
            (addr < buffer_ctx->buf_len))
     {
         memset(ascii, '\0', ASCII_STR_LEN);
