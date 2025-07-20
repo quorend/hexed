@@ -1,6 +1,14 @@
 # hexed
 (Yet another) hex editor.
 
-Project Status: In development.
+Project Status: __In development__
 
-This project uses CuTest for unit testing (https://github.com/ennorehling/cutest).
+## Supported Platforms
+- GNU/Linux
+
+## Required Dependencies
+- gcc
+- make
+- C standard library
+
+This project comes bundled with [CuTest](https://github.com/ennorehling/cutest) for unit testing.
