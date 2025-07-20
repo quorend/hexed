@@ -240,8 +240,8 @@ static void TestInputAcc_navRight2(CuTest *tc)
 
     CuAssertSizetEquals(tc, 42, buffer_ctx.point_pos);
 
-    size_t expected = buffer_ctx.term_height - NONBUF_ROWS >= 3 ? 0x0 :
-                     (buffer_ctx.term_height - NONBUF_ROWS == 2 ? 0x10 : 0x20);
+    size_t expected = buffer_ctx.term_height - NONBUF_ROWS > 2 ? 0x0 :
+        0x10 * (2 - (buffer_ctx.term_height - NONBUF_ROWS - 1));
     CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
 
     INPUT_TEST_TEARDOWN;
@@ -315,7 +315,29 @@ static void TestInputAcc_navDown1(CuTest *tc)
 
     CuAssertSizetEquals(tc, 0x10, buffer_ctx.point_pos);
 
-    size_t expected = buffer_ctx.term_height - NONBUF_ROWS >= 2 ? 0x0 : 0x10;
+    size_t expected = buffer_ctx.term_height - NONBUF_ROWS > 1 ? 0x0 :
+        0x10 * (1 - (buffer_ctx.term_height - NONBUF_ROWS - 1));
+    CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
+static void TestInputAcc_navDown2(CuTest *tc)
+{
+    /*
+     * This command file has eight-hundred <down> commands and ends with the
+     * program termination byte. Thus, point_pos should have the value 0x3200.
+     * The value of first_row will depend on the height of the terminal.
+     */
+
+    INPUT_TEST_SETUP("test/input-navDown2", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, 0x3200, buffer_ctx.point_pos);
+
+    size_t expected = buffer_ctx.term_height - NONBUF_ROWS > 800 ? 0x0 :
+        0x10 * (800 - (buffer_ctx.term_height - NONBUF_ROWS - 1));
     CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
 
     INPUT_TEST_TEARDOWN;
@@ -377,6 +399,7 @@ CuSuite *input_GetSuite(void)
     SUITE_ADD_TEST(suite, TestInputAcc_navLeft2);
     SUITE_ADD_TEST(suite, TestInputAcc_navUp1);
     SUITE_ADD_TEST(suite, TestInputAcc_navDown1);
+    SUITE_ADD_TEST(suite, TestInputAcc_navDown2);
     SUITE_ADD_TEST(suite, TestInputAcc_advance1);
     SUITE_ADD_TEST(suite, TestInputAcc_advance2);
     return suite;
