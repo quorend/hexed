@@ -68,6 +68,75 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 
                 switch (c)
                 {
+                case '5': /* pageup */
+                    ec = read(fd, &c, 1);
+                    check_ec();
+
+                    if (c != '~')
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        const size_t before = buffer_ctx->first_row;
+                        const size_t point = buffer_ctx->point_pos;
+
+                        buffer_ctx->first_row -= 0x10 * BUF_HEIGHT;
+                        buffer_ctx->point_pos = buffer_ctx->first_row +
+                            ((BUF_HEIGHT - 1) * 0x10) +
+                            (point % 0x10);
+
+                        if (buffer_ctx->first_row > before)
+                        {
+                            buffer_ctx->first_row = 0x0;
+
+                            if (point >= BUF_HEIGHT * 0x10)
+                            {
+                                buffer_ctx->point_pos = ((BUF_HEIGHT - 1) * 0x10) +
+                                    (point % 0x10);
+                            }
+                            else
+                            {
+                                buffer_ctx->point_pos = point;
+                            }
+                        }
+                    }
+                    break;
+                case '6': /* pagedown */
+                    ec = read(fd, &c, 1);
+                    check_ec();
+
+                    if (c != '~')
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        const size_t point = buffer_ctx->point_pos;
+
+                        buffer_ctx->first_row += 0x10 * BUF_HEIGHT;
+                        buffer_ctx->point_pos = buffer_ctx->first_row +
+                            (point % 0x10);
+
+                        const size_t first_row_max = (buffer_ctx->buf_len - (buffer_ctx->buf_len % 0x10)) -
+                            ((BUF_HEIGHT - 1) * 0x10);
+
+                        if (buffer_ctx->first_row > first_row_max)
+                        {
+                            buffer_ctx->first_row = first_row_max;
+
+                            if (point < buffer_ctx->first_row)
+                            {
+                                buffer_ctx->point_pos = buffer_ctx->first_row +
+                                    (point % 0x10);
+                            }
+                            else
+                            {
+                                buffer_ctx->point_pos = point;
+                            }
+                        }
+                    }
+                    break;
                 case 'A': /* UP arrow */
                     if (buffer_getPosition(buffer_ctx) > 0xF)
                     {
