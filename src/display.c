@@ -119,9 +119,9 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
                 printf(" ");
             }
 
+            char temp[2];
             if (no_ascii == false)
             {
-                char temp[2];
                 if ((buff[addr + i] > 0x1F) && (buff[addr + i] < 0x7F))
                 {
                     snprintf(temp, 2, "%c", buff[addr + i]);
@@ -131,8 +131,14 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
                     /* Use period instead of printing special characters. */
                     snprintf(temp, 2, ".");
                 }
-                strcat(ascii, temp);
             }
+            else
+            {
+                temp[0] = ' ';
+                temp[1] = '\0';
+            }
+            strcat(ascii, temp);
+
         }
 
         /* Print ASCII */
