@@ -8,7 +8,9 @@
  *        read.
  * @param[in,out] buffer_ctx buffer context structure
  * @param[in] fd file descriptor to read input from (typically stdin)
- * @return 0 on success, or errno on read() error
+ * @return 0 on success,
+ *         or errno on read() error,
+ *         or negative value on other error
  */
 int input_accept(struct Buffer_Ctx *buffer_ctx, int fd);
 

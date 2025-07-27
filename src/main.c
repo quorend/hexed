@@ -90,9 +90,13 @@ int main(int argc, char *argv[])
                 set_input_mode();
 
                 rc = input_accept(&buffer_ctx, STDIN_FILENO);
-                if (rc != 0)
+                if (rc > 0)
                 {
                     printf("ERR: input_accept(): %s\r\n", strerror(rc));
+                }
+                else if (rc < 0)
+                {
+                    printf("ERR: file_access_saveFile(): %d\r\n", rc);
                 }
 
                 free(buffer_ctx.buf);

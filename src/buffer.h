@@ -26,6 +26,8 @@ enum Mode
  */
 struct Buffer_Ctx
 {
+    /* File path */
+    const char *path;
     /* Buffer contents */
     uint8_t *buf;
     /* Number of bytes in buffer */

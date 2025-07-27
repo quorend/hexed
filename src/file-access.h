@@ -15,4 +15,11 @@
  */
 int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path);
 
+/**
+ * @brief Write buffer to file.
+ * @param[in] buffer_ctx context containing file path and pointer to buffer
+ * @return 0 on success, otherwise negative return code
+ */
+int file_access_saveFile(struct Buffer_Ctx *buffer_ctx);
+
 #endif /* __FILE_ACCESS_H__ */

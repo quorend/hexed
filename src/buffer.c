@@ -27,6 +27,7 @@
 
 void buffer_init(struct Buffer_Ctx *buffer_ctx)
 {
+    buffer_ctx->path = NULL;
     buffer_ctx->buf = NULL;
     buffer_ctx->buf_len = 0;
     buffer_ctx->first_row = 0;

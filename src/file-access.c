@@ -25,9 +25,114 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "file-access.h"
 #include "cutest/CuTest.h"
+
+/**
+ * @brief Back-up original file.
+ * @param[in] buffer_ctx context containing buffer
+ * @return 0 on success, otherwise non-zero
+ */
+static int save_backup(struct Buffer_Ctx *buffer_ctx)
+{
+    FILE *fp;
+    FILE *fp_bak;
+    struct stat statbuf;
+    size_t buf_sz;
+    int rc = 0;
+    uint8_t byte_bak;
+    char *path_bak;
+
+    /* Allocate enough space for the path, plus '~' , plus '\0' */
+    path_bak = malloc(strlen(buffer_ctx->path) + 2);
+    if (path_bak == NULL)
+    {
+        rc = -1;
+        goto __exit__;
+    }
+
+    path_bak[0] = '\0';
+    strcat(path_bak, buffer_ctx->path);
+    strcat(path_bak, "~");
+
+    fp = fopen(buffer_ctx->path, "r");
+    if (fp == NULL)
+    {
+        rc = -2;
+        goto __malloc__;
+    }
+
+    fp_bak = fopen(path_bak, "w");
+    if (fp_bak == NULL)
+    {
+        rc = -3;
+        goto __fopen_1__;
+    }
+
+    stat(buffer_ctx->path, &statbuf);
+    buf_sz = (size_t)statbuf.st_size;
+
+    for (size_t i = 0; i < buf_sz; i++)
+    {
+        size_t rv;
+
+        rv = fread(&byte_bak, 1, 1, fp);
+        if (rv != 1)
+        {
+            rc = -4;
+            goto __fopen_2__;
+        }
+
+        rv = fwrite(&byte_bak, 1, 1, fp_bak);
+        if (rv != 1)
+        {
+            rc = -5;
+            goto __fopen_2__;
+        }
+    }
+
+__fopen_2__:
+    fclose(fp_bak);
+__fopen_1__:
+    fclose(fp);
+__malloc__:
+    free(path_bak);
+__exit__:
+    return rc;
+}
+
+/**
+ * @brief Write buffer out to file.
+ * @param[in] buffer_ctx context containing buffer
+ * @return 0 on success, otherwise non-zero
+ */
+static int save_buffer(struct Buffer_Ctx *buffer_ctx)
+{
+    FILE *fp;
+    size_t bytes_written;
+    int rc = 0;
+
+    fp = fopen(buffer_ctx->path, "w");
+    if (fp == NULL)
+    {
+        rc = -6;
+        goto __exit__;
+    }
+
+    bytes_written = fwrite(buffer_ctx->buf, 1, buffer_ctx->buf_len, fp);
+    if (bytes_written != buffer_ctx->buf_len)
+    {
+        rc = -7;
+        goto __fclose__;
+    }
+
+__fclose__:
+    fclose(fp);
+__exit__:
+    return rc;
+}
 
 int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
 {
@@ -35,6 +140,9 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
     int rc = 0;
     struct stat statbuf;
     size_t bytes_read = 0;
+
+    /* Save file path */
+    buffer_ctx->path = path;
 
     /* Open file */
     fp = fopen(path, "r");
@@ -67,6 +175,24 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
 
 __fclose__:
     fclose(fp);
+__exit__:
+    return rc;
+}
+
+int file_access_saveFile(struct Buffer_Ctx *buffer_ctx)
+{
+    int rc = 0;
+
+    /* Copy file to file~ */
+    rc = save_backup(buffer_ctx);
+    if (rc != 0)
+    {
+        goto __exit__;
+    }
+
+    /* Write buffer to file */
+    rc = save_buffer(buffer_ctx);
+
 __exit__:
     return rc;
 }

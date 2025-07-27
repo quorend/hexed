@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "input.h"
 #include "display.h"
@@ -38,15 +39,16 @@ do \
     if (ec == -1) \
     { \
         rc = errno; \
-        break; \
+        goto __exit__; \
     } \
 } \
-while(0)
+while (0)
 
 int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
     unsigned char c = '\0';
     ssize_t ec = 0;
+    int file_err = 0;
     int rc = 0;
 
     display_draw(buffer_ctx, true);
@@ -56,7 +58,7 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
         ec = read(fd, &c, 1);
         check_ec();
 
-        if (c == '\033') /* ESC character */
+        if (c == 0x1B) /* ESC character */
         {
             ec = read(fd, &c, 1);
             check_ec();
@@ -172,6 +174,15 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
         {
             break;
         }
+        else if (c == 0x10) /* C^P - Save buffer to file */
+        {
+            file_err = file_access_saveFile(buffer_ctx);
+            if (file_err != 0)
+            {
+                /* Failed to write to filesystem */
+                printf("ERR %d: failed to write to file system", file_err);
+            }
+        }
         else if (c == 0x12) /* C^R - Switch to MODE_READ */
         {
             buffer_ctx->mode = MODE_READ;
@@ -202,7 +213,8 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 
     }
 
-    return rc;
+__exit__:
+    return file_err != 0 ? file_err : rc;
 }
 
 /*
