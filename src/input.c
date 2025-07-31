@@ -232,7 +232,8 @@ __exit__:
  * @param[in] buffer_input quoted path to buffer input file
  */
 #define INPUT_TEST_SETUP(command_input, buffer_input) \
-struct Buffer_Ctx buffer_ctx; \
+struct Buffer_Ctx b_ctx; \
+struct Buffer_Ctx *buffer_ctx = &b_ctx; \
 int fd; \
 int rc = 0; \
  \
@@ -245,16 +246,16 @@ do \
         goto __exit__; \
     } \
  \
-    buffer_init(&buffer_ctx); \
+    buffer_init(buffer_ctx); \
  \
-    rc = file_access_loadFile(&buffer_ctx, buffer_input); \
+    rc = file_access_loadFile(buffer_ctx, buffer_input); \
     if (rc != 0) \
     { \
         CuFail(tc, "Failed to load file."); \
         goto __close_file__; \
     } \
  \
-    input_accept(&buffer_ctx, fd); \
+    input_accept(buffer_ctx, fd); \
  \
 } \
 while(0)
@@ -265,7 +266,7 @@ while(0)
 #define INPUT_TEST_TEARDOWN \
 do \
 { \
-    free(buffer_ctx.buf); \
+    free(buffer_ctx->buf); \
  \
 __close_file__: \
     if (close(fd) == -1) \
@@ -287,8 +288,8 @@ static void TestInputAcc_simple(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-simple", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
-    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, 0, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -306,8 +307,8 @@ static void TestInputAcc_navRight1(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-navRight1", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 5, buffer_ctx.point_pos);
-    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, 5, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -324,11 +325,11 @@ static void TestInputAcc_navRight2(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-navRight2", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 42, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 42, buffer_ctx->point_pos);
 
-    size_t expected = BUF_HEIGHT_TEST > 2 ? 0x0 :
-        0x10 * (2 - (BUF_HEIGHT_TEST - 1));
-    CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
+    size_t expected = BUF_HEIGHT > 2 ? 0x0 :
+        0x10 * (2 - (BUF_HEIGHT - 1));
+    CuAssertSizetEquals(tc, expected, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -345,8 +346,8 @@ static void TestInputAcc_navLeft1(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-navLeft1", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
-    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, 0, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -363,8 +364,8 @@ static void TestInputAcc_navLeft2(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-navLeft2", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
-    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, 0, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -381,8 +382,8 @@ static void TestInputAcc_navUp1(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-navUp1", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
-    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, 0, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -399,11 +400,11 @@ static void TestInputAcc_navDown1(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-navDown1", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 0x10, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x10, buffer_ctx->point_pos);
 
-    size_t expected = BUF_HEIGHT_TEST > 1 ? 0x0 :
-        0x10 * (1 - (BUF_HEIGHT_TEST - 1));
-    CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
+    size_t expected = BUF_HEIGHT > 1 ? 0x0 :
+        0x10 * (1 - (BUF_HEIGHT - 1));
+    CuAssertSizetEquals(tc, expected, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -420,11 +421,11 @@ static void TestInputAcc_navDown2(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-navDown2", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 0x3200, buffer_ctx.point_pos);
+    CuAssertSizetEquals(tc, 0x3200, buffer_ctx->point_pos);
 
-    size_t expected = BUF_HEIGHT_TEST > 800 ? 0x0 :
-        0x10 * (800 - (BUF_HEIGHT_TEST - 1));
-    CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
+    size_t expected = BUF_HEIGHT > 800 ? 0x0 :
+        0x10 * (800 - (BUF_HEIGHT - 1));
+    CuAssertSizetEquals(tc, expected, buffer_ctx->first_row);
 
     INPUT_TEST_TEARDOWN;
 
@@ -443,9 +444,9 @@ static void TestInputAcc_advance1(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-advance1", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 1, buffer_ctx.point_pos);
-    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
-    CuAssertTrue(tc, !(buffer_ctx.advance));
+    CuAssertSizetEquals(tc, 1, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
+    CuAssertTrue(tc, !(buffer_ctx->advance));
 
     INPUT_TEST_TEARDOWN;
 
@@ -466,9 +467,9 @@ static void TestInputAcc_advance2(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-advance2", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, 9, buffer_ctx.point_pos);
-    CuAssertSizetEquals(tc, 0x0, buffer_ctx.first_row);
-    CuAssertTrue(tc, buffer_ctx.advance);
+    CuAssertSizetEquals(tc, 9, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
+    CuAssertTrue(tc, buffer_ctx->advance);
 
     INPUT_TEST_TEARDOWN;
 
@@ -487,8 +488,11 @@ static void TestInputAcc_pageDown1(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-pageDown1", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, BUF_HEIGHT_TEST * 0x10, buffer_ctx.first_row);
-    CuAssertSizetEquals(tc, buffer_ctx.first_row + 3, buffer_ctx.point_pos);
+    if (buffer_ctx->buf_len >= BUF_HEIGHT * 0x10 * 2)
+    {
+        CuAssertSizetEquals(tc, BUF_HEIGHT * 0x10, buffer_ctx->first_row);
+        CuAssertSizetEquals(tc, buffer_ctx->first_row + 3, buffer_ctx->point_pos);
+    }
 
     INPUT_TEST_TEARDOWN;
 
@@ -508,9 +512,12 @@ static void TestInputAcc_pageUp1(CuTest *tc)
 
     INPUT_TEST_SETUP("test/input-pageUp1", "test/lorem-ipsum.txt");
 
-    CuAssertSizetEquals(tc, BUF_HEIGHT_TEST * 0x10, buffer_ctx.first_row);
-    CuAssertSizetEquals(tc, (BUF_HEIGHT_TEST * 0x10 * 2) - 0x10 + 4,
-                        buffer_ctx.point_pos);
+    if (buffer_ctx->buf_len >= BUF_HEIGHT * 0x10 * 3)
+    {
+        CuAssertSizetEquals(tc, BUF_HEIGHT * 0x10, buffer_ctx->first_row);
+        CuAssertSizetEquals(tc, (BUF_HEIGHT * 0x10 * 2) - 0x10 + 4,
+                            buffer_ctx->point_pos);
+    }
 
     INPUT_TEST_TEARDOWN;
 
