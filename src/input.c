@@ -170,6 +170,11 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 
             display_draw(buffer_ctx, false);
         }
+        else if (c == 0x01) /* C^A - Toggle advance feature */
+        {
+            buffer_ctx->advance = !(buffer_ctx->advance);
+            display_draw(buffer_ctx, false);
+        }
         else if (c == 0x04) /* C^D - Exit program */
         {
             break;
@@ -193,10 +198,10 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
             buffer_ctx->mode = MODE_OVERWRITE;
             display_draw(buffer_ctx, false);
         }
-        else if (c == 0x01) /* C^A - Toggle advance feature */
+        else if (c >= 0x01 && c <= 0x1A) /* (C^A to C^Z) */
         {
-            buffer_ctx->advance = !(buffer_ctx->advance);
-            display_draw(buffer_ctx, false);
+            /* Discard unused Ctrl^ characters */
+            continue;
         }
         else
         {
