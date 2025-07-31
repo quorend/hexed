@@ -6,7 +6,8 @@
 #include <stdbool.h>
 
 #define NONBUF_ROWS 3
-#define BUF_HEIGHT (buffer_ctx->term_height - NONBUF_ROWS)
+#define BUF_HEIGHT      (buffer_ctx->term_height - NONBUF_ROWS)
+#define BUF_HEIGHT_TEST (buffer_ctx.term_height - NONBUF_ROWS)
 
 /**
  * @enum Mode

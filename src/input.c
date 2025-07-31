@@ -326,8 +326,8 @@ static void TestInputAcc_navRight2(CuTest *tc)
 
     CuAssertSizetEquals(tc, 42, buffer_ctx.point_pos);
 
-    size_t expected = buffer_ctx.term_height - NONBUF_ROWS > 2 ? 0x0 :
-        0x10 * (2 - (buffer_ctx.term_height - NONBUF_ROWS - 1));
+    size_t expected = BUF_HEIGHT_TEST > 2 ? 0x0 :
+        0x10 * (2 - (BUF_HEIGHT_TEST - 1));
     CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
 
     INPUT_TEST_TEARDOWN;
@@ -401,8 +401,8 @@ static void TestInputAcc_navDown1(CuTest *tc)
 
     CuAssertSizetEquals(tc, 0x10, buffer_ctx.point_pos);
 
-    size_t expected = buffer_ctx.term_height - NONBUF_ROWS > 1 ? 0x0 :
-        0x10 * (1 - (buffer_ctx.term_height - NONBUF_ROWS - 1));
+    size_t expected = BUF_HEIGHT_TEST > 1 ? 0x0 :
+        0x10 * (1 - (BUF_HEIGHT_TEST - 1));
     CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
 
     INPUT_TEST_TEARDOWN;
@@ -422,8 +422,8 @@ static void TestInputAcc_navDown2(CuTest *tc)
 
     CuAssertSizetEquals(tc, 0x3200, buffer_ctx.point_pos);
 
-    size_t expected = buffer_ctx.term_height - NONBUF_ROWS > 800 ? 0x0 :
-        0x10 * (800 - (buffer_ctx.term_height - NONBUF_ROWS - 1));
+    size_t expected = BUF_HEIGHT_TEST > 800 ? 0x0 :
+        0x10 * (800 - (BUF_HEIGHT_TEST - 1));
     CuAssertSizetEquals(tc, expected, buffer_ctx.first_row);
 
     INPUT_TEST_TEARDOWN;
@@ -475,6 +475,48 @@ static void TestInputAcc_advance2(CuTest *tc)
     return;
 }
 
+static void TestInputAcc_pageDown1(CuTest *tc)
+{
+    /*
+     * This command file has one <down> command, three <right> commands, and one
+     * <pagedown> command and ends with the program termination byte. Thus,
+     * first_row should have advanced by one page's worth of bytes
+     * (BUF_HEIGHT * 0x10) and point_pos should have the value of three more
+     * than first_row.
+     */
+
+    INPUT_TEST_SETUP("test/input-pageDown1", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, BUF_HEIGHT_TEST * 0x10, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, buffer_ctx.first_row + 3, buffer_ctx.point_pos);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
+static void TestInputAcc_pageUp1(CuTest *tc)
+{
+    /*
+     * This command file has four <right> commands, two <pagedown> commands, and
+     * one <pageup> command and ends with the program termination byte. Thus,
+     * first_row should have advanced by one page's worth of bytes (in the
+     * likely case that the end of the buffer is not reached with two <pagedown>
+     * commands) and point_pos should be on the last row of the displayed
+     * portion of the buffer, with a positive offset of four bytes.
+     */
+
+    INPUT_TEST_SETUP("test/input-pageUp1", "test/lorem-ipsum.txt");
+
+    CuAssertSizetEquals(tc, BUF_HEIGHT_TEST * 0x10, buffer_ctx.first_row);
+    CuAssertSizetEquals(tc, (BUF_HEIGHT_TEST * 0x10 * 2) - 0x10 + 4,
+                        buffer_ctx.point_pos);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
@@ -488,5 +530,7 @@ CuSuite *input_GetSuite(void)
     SUITE_ADD_TEST(suite, TestInputAcc_navDown2);
     SUITE_ADD_TEST(suite, TestInputAcc_advance1);
     SUITE_ADD_TEST(suite, TestInputAcc_advance2);
+    SUITE_ADD_TEST(suite, TestInputAcc_pageDown1);
+    SUITE_ADD_TEST(suite, TestInputAcc_pageUp1);
     return suite;
 }
