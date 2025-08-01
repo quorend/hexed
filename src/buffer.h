@@ -6,7 +6,11 @@
 #include <stdbool.h>
 
 #define NONBUF_ROWS 3
-#define BUF_HEIGHT (buffer_ctx->term_height - NONBUF_ROWS)
+#define BUF_HEIGHT_LARGE_BUFFER (buffer_ctx->term_height - NONBUF_ROWS)
+#define BUF_HEIGHT_SMALL_BUFFER \
+    ((buffer_ctx->buf_len / 0x10) + (buffer_ctx->buf_len % 0x10 ? 1 : 0))
+#define BUF_HEIGHT (buffer_ctx->buf_len < BUF_HEIGHT_LARGE_BUFFER * 0x10 ? \
+                    BUF_HEIGHT_SMALL_BUFFER : BUF_HEIGHT_LARGE_BUFFER)
 
 /**
  * @enum Mode

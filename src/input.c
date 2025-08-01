@@ -120,8 +120,10 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
                         buffer_ctx->point_pos = buffer_ctx->first_row +
                             (point % 0x10);
 
-                        const size_t first_row_max = (buffer_ctx->buf_len - (buffer_ctx->buf_len % 0x10)) -
-                            ((BUF_HEIGHT - 1) * 0x10);
+                        const size_t first_byte_in_last_row =
+                            buffer_ctx->buf_len - (buffer_ctx->buf_len % 0x10);
+                        const size_t first_row_max =
+                            first_byte_in_last_row - ((BUF_HEIGHT - 1) * 0x10);
 
                         if (buffer_ctx->first_row > first_row_max)
                         {
