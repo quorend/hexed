@@ -30,6 +30,72 @@
 #include "file-access.h"
 #include "cutest/CuTest.h"
 
+static int save_backup(struct Buffer_Ctx *buffer_ctx);
+static int save_buffer(struct Buffer_Ctx *buffer_ctx);
+
+int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
+{
+    FILE *fp;
+    int rc = 0;
+    struct stat statbuf;
+    size_t bytes_read = 0;
+
+    /* Save file path */
+    buffer_ctx->path = path;
+
+    /* Open file */
+    fp = fopen(path, "r");
+    if (!fp)
+    {
+        rc = 1;
+        goto __exit__;
+    }
+
+    /* Get file stats (filesize) */
+    stat(path, &statbuf);
+    buffer_ctx->buf_len = (size_t)statbuf.st_size;
+
+    /* Allocate memory for buffer */
+    buffer_ctx->buf = malloc(buffer_ctx->buf_len);
+    if (buffer_ctx->buf == NULL)
+    {
+        rc = 2;
+        goto __fclose__;
+    }
+
+    /* Load file contents into buffer */
+    bytes_read = fread(buffer_ctx->buf, sizeof(uint8_t), buffer_ctx->buf_len, fp);
+    if (bytes_read != buffer_ctx->buf_len)
+    {
+        free(buffer_ctx->buf);
+        rc = 3;
+        goto __fclose__;
+    }
+
+__fclose__:
+    fclose(fp);
+__exit__:
+    return rc;
+}
+
+int file_access_saveFile(struct Buffer_Ctx *buffer_ctx)
+{
+    int rc = 0;
+
+    /* Copy file to file~ */
+    rc = save_backup(buffer_ctx);
+    if (rc != 0)
+    {
+        goto __exit__;
+    }
+
+    /* Write buffer to file */
+    rc = save_buffer(buffer_ctx);
+
+__exit__:
+    return rc;
+}
+
 /**
  * @brief Back-up original file.
  * @param[in] buffer_ctx context containing buffer
@@ -130,69 +196,6 @@ static int save_buffer(struct Buffer_Ctx *buffer_ctx)
 
 __fclose__:
     fclose(fp);
-__exit__:
-    return rc;
-}
-
-int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
-{
-    FILE *fp;
-    int rc = 0;
-    struct stat statbuf;
-    size_t bytes_read = 0;
-
-    /* Save file path */
-    buffer_ctx->path = path;
-
-    /* Open file */
-    fp = fopen(path, "r");
-    if (!fp)
-    {
-        rc = 1;
-        goto __exit__;
-    }
-
-    /* Get file stats (filesize) */
-    stat(path, &statbuf);
-    buffer_ctx->buf_len = (size_t)statbuf.st_size;
-
-    /* Allocate memory for buffer */
-    buffer_ctx->buf = malloc(buffer_ctx->buf_len);
-    if (buffer_ctx->buf == NULL)
-    {
-        rc = 2;
-        goto __fclose__;
-    }
-
-    /* Load file contents into buffer */
-    bytes_read = fread(buffer_ctx->buf, sizeof(uint8_t), buffer_ctx->buf_len, fp);
-    if (bytes_read != buffer_ctx->buf_len)
-    {
-        free(buffer_ctx->buf);
-        rc = 3;
-        goto __fclose__;
-    }
-
-__fclose__:
-    fclose(fp);
-__exit__:
-    return rc;
-}
-
-int file_access_saveFile(struct Buffer_Ctx *buffer_ctx)
-{
-    int rc = 0;
-
-    /* Copy file to file~ */
-    rc = save_backup(buffer_ctx);
-    if (rc != 0)
-    {
-        goto __exit__;
-    }
-
-    /* Write buffer to file */
-    rc = save_buffer(buffer_ctx);
-
 __exit__:
     return rc;
 }
