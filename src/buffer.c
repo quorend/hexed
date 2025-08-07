@@ -54,9 +54,14 @@ static void TestBufInit(CuTest *tc)
 
     buffer_init(&buffer_ctx);
 
+    CuAssertPtrEquals(tc, NULL, (void *)buffer_ctx.path);
     CuAssertPtrEquals(tc, NULL, buffer_ctx.buf);
+    CuAssertSizetEquals(tc, 0, buffer_ctx.buf_len);
     CuAssertSizetEquals(tc, 0, buffer_ctx.first_row);
     CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
+    CuAssertIntEquals(tc, MODE_READ, buffer_ctx.mode);
+    CuAssertTrue(tc, buffer_ctx.advance == false);
+    CuAssertTrue(tc, buffer_ctx.term_height >= 1 + NONBUF_ROWS);
 
     return;
 }
