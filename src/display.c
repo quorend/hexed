@@ -82,7 +82,7 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
     printf("%s", HEADER);
 
     while (((addr - buffer_ctx->first_row) / 0x10 < BUF_HEIGHT) &&
-           (addr < buffer_ctx->buf_len))
+           (addr <= buffer_ctx->buf_len))
     {
         memset(ascii, '\0', ASCII_STR_LEN);
 
@@ -109,7 +109,16 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
             else
             {
                 /* Don't try to print bytes beyond the length of the buffer. */
-                printf("  ");
+
+                if ((addr + i) != buffer_getPosition(buffer_ctx))
+                {
+                    printf("  ");
+                }
+                else
+                {
+                    printf("\e[41m  \e[m");
+                }
+
                 no_ascii = true;
             }
 

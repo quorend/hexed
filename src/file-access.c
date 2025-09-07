@@ -56,7 +56,8 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
     buffer_ctx->buf_len = (size_t)statbuf.st_size;
 
     /* Allocate memory for buffer */
-    buffer_ctx->buf = malloc(buffer_ctx->buf_len);
+    buffer_ctx->alloc_len = buffer_ctx->buf_len;
+    buffer_ctx->buf = malloc(buffer_ctx->alloc_len);
     if (buffer_ctx->buf == NULL)
     {
         rc = 2;
@@ -64,7 +65,8 @@ int file_access_loadFile(struct Buffer_Ctx *buffer_ctx, const char *path)
     }
 
     /* Load file contents into buffer */
-    bytes_read = fread(buffer_ctx->buf, sizeof(uint8_t), buffer_ctx->buf_len, fp);
+    bytes_read = fread(buffer_ctx->buf, sizeof(uint8_t),
+                       buffer_ctx->buf_len, fp);
     if (bytes_read != buffer_ctx->buf_len)
     {
         free(buffer_ctx->buf);
@@ -187,7 +189,8 @@ static int save_buffer(struct Buffer_Ctx *buffer_ctx)
         goto __exit__;
     }
 
-    bytes_written = fwrite(buffer_ctx->buf, 1, buffer_ctx->buf_len, fp);
+    bytes_written = fwrite(buffer_ctx->buf, sizeof(uint8_t),
+                           buffer_ctx->buf_len, fp);
     if (bytes_written != buffer_ctx->buf_len)
     {
         rc = -7;

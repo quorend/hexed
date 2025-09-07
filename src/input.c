@@ -44,6 +44,8 @@ do \
 } \
 while (0)
 
+static void point_retreat(struct Buffer_Ctx *buffer_ctx);
+
 int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
     unsigned char c = '\0';
@@ -148,13 +150,19 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
                     }
                     break;
                 case 'B': /* DOWN arrow */
-                    if (buffer_getPosition(buffer_ctx) < buffer_ctx->buf_len - 0x10)
+                    /* Point can go one past end of the buffer in MODE_INSERT */
+                    if (buffer_getPosition(buffer_ctx) <
+                        (buffer_ctx->buf_len -
+                         (buffer_ctx->mode == MODE_INSERT ? 0xF : 0x10)))
                     {
                         buffer_ctx->point_pos += 0x10;
                     }
                     break;
                 case 'C': /* RIGHT arrow */
-                    if (buffer_getPosition(buffer_ctx) < buffer_ctx->buf_len - 1)
+                    /* Point can go one past end of the buffer in MODE_INSERT */
+                    if (buffer_getPosition(buffer_ctx) <
+                        (buffer_ctx->mode == MODE_INSERT ?
+                         buffer_ctx->buf_len : buffer_ctx->buf_len - 1))
                     {
                         buffer_ctx->point_pos++;
                     }
@@ -181,6 +189,11 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
         {
             break;
         }
+        else if (c == 0x05) /* C^E - Switch to MODE_INSERT */
+        {
+            buffer_ctx->mode = MODE_INSERT;
+            display_draw(buffer_ctx, false);
+        }
         else if (c == 0x10) /* C^P - Save buffer to file */
         {
             file_err = file_access_saveFile(buffer_ctx);
@@ -193,11 +206,13 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
         else if (c == 0x12) /* C^R - Switch to MODE_READ */
         {
             buffer_ctx->mode = MODE_READ;
+            point_retreat(buffer_ctx);
             display_draw(buffer_ctx, false);
         }
         else if (c == 0x17) /* C^W - Switch to MODE_OVERWRITE */
         {
             buffer_ctx->mode = MODE_OVERWRITE;
+            point_retreat(buffer_ctx);
             display_draw(buffer_ctx, false);
         }
         else if (c >= 0x01 && c <= 0x1A) /* (C^A to C^Z) */
@@ -214,14 +229,86 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
                 {
                     buffer_ctx->point_pos++;
                 }
-                display_draw(buffer_ctx, false);
             }
+            else if (buffer_ctx->mode == MODE_INSERT)
+            {
+                if (buffer_ctx->buf_len == buffer_ctx->alloc_len)
+                {
+                    uint8_t *buffer;
+                    size_t old_alloc_len = buffer_ctx->alloc_len;
+
+                    buffer_ctx->alloc_len += 16; /* TODO: experiment with this value */
+                    if (buffer_ctx->alloc_len == 0)
+                    {
+                        printf("ERR: allocation length"
+                               " should not be changed to 0");
+                        buffer_ctx->alloc_len = old_alloc_len;
+                        continue;
+                    }
+                    buffer = realloc(buffer_ctx->buf, buffer_ctx->alloc_len);
+                    if (buffer == NULL)
+                    {
+                        printf("ERR: realloc() failed");
+                        buffer_ctx->alloc_len = old_alloc_len;
+                        continue;
+                    }
+                    else
+                    {
+                        buffer_ctx->buf = buffer;
+                    }
+                }
+                else if (buffer_ctx->buf_len > buffer_ctx->alloc_len)
+                {
+                    /* ERROR this should never ever happen */
+                    /* It likely means that we have overrun our buffer */
+                    exit(EXIT_FAILURE);
+                }
+
+                /*
+                 * Shift all bytes equal to or greater than point to the right.
+                 * The buffer length grows by one.
+                 */
+                for (size_t i = buffer_ctx->buf_len; i > buffer_ctx->point_pos; i--)
+                {
+                    buffer_ctx->buf[i] = buffer_ctx->buf[i - 1];
+                }
+                buffer_ctx->buf_len++;
+
+                /* Write new byte to the correct index and increment point */
+                buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
+                buffer_ctx->point_pos++;
+            }
+
+            /* Redraw after overwriting or inserting a byte */
+            display_draw(buffer_ctx, false);
         }
 
     }
 
 __exit__:
     return file_err != 0 ? file_err : rc;
+}
+
+/**
+ * @brief Bring point back from beyond the end of the buffer.
+ * @param[in,out] buffer_ctx buffer context structure
+ * @return void
+ */
+static void point_retreat(struct Buffer_Ctx *buffer_ctx)
+{
+    /*
+     * In MODE_READ and MODE_OVERWRITE point is not allowed to go past the last
+     * byte in the buffer. If point is one index past the end of the buffer,
+     * bring point back to the last byte.
+     */
+
+    if (buffer_ctx->point_pos == buffer_ctx->buf_len &&
+        buffer_ctx->point_pos != 0)
+    {
+        buffer_ctx->point_pos--;
+    }
+
+    return;
 }
 
 /*
@@ -526,6 +613,88 @@ static void TestInputAcc_pageUp1(CuTest *tc)
     return;
 }
 
+static void TestInputAcc_insert1(CuTest *tc)
+{
+    /*
+     * This command file enables MODE_INSERT and ends with the program
+     * termination byte. Thus, MODE_INSERT should be enabled.
+     */
+
+    INPUT_TEST_SETUP("test/input-insert1", "test/lorem-ipsum.txt");
+
+    CuAssertTrue(tc, buffer_ctx->mode == MODE_INSERT);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
+static void TestInputAcc_insert2(CuTest *tc)
+{
+    /*
+     * This command file enables MODE_INSERT, inserts a single byte, and ends
+     * with the program termination byte. The buffer is populated from a
+     * zero-length file. Thus, first_row should have a value of 0 and point_pos
+     * should have the value of 1.
+     */
+
+    INPUT_TEST_SETUP("test/input-insert2", "test/empty.txt");
+
+    CuAssertSizetEquals(tc, 1, buffer_ctx->point_pos);
+    CuAssertSizetEquals(tc, 0x0, buffer_ctx->first_row);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
+static void TestInputAcc_insert3(CuTest *tc)
+{
+    /*
+     * This command file enables MODE_INSERT, right-arrows to the end of the
+     * buffer (one past the end), inserts a single byte, and ends with the
+     * program termination byte. Thus, alloc_len should grow as a result of
+     * needing a longer buffer to store the additional inserted byte. The macro
+     * INPUT_TEST_SETUP is not used in this test because we need to cache the
+     * values of alloc_len and buf_len before running the commands in order to
+     * compare with the values afterwards.
+     */
+
+    struct Buffer_Ctx b_ctx;
+    struct Buffer_Ctx *buffer_ctx = &b_ctx;
+    int fd;
+    int rc = 0;
+
+    fd = open("test/input-insert3", O_RDONLY);
+    if (fd == -1)
+    {
+        CuFail(tc, "Failed to open input file.");
+        goto __exit__;
+    }
+
+    buffer_init(buffer_ctx);
+
+    rc = file_access_loadFile(buffer_ctx, "test/sixteen-bytes.txt");
+    if (rc != 0)
+    {
+        CuFail(tc, "Failed to load file.");
+        goto __close_file__;
+    }
+
+    size_t alloc_len_before = buffer_ctx->alloc_len;
+    size_t buf_len_before = buffer_ctx->buf_len;
+
+    input_accept(buffer_ctx, fd);
+
+    CuAssertSizetEquals(tc, 17, buffer_ctx->point_pos);
+    CuAssertTrue(tc, buffer_ctx->alloc_len > alloc_len_before);
+    CuAssertTrue(tc, buffer_ctx->buf_len > buf_len_before);
+
+    INPUT_TEST_TEARDOWN;
+
+    return;
+}
+
 CuSuite *input_GetSuite(void)
 {
     CuSuite *suite = CuSuiteNew();
@@ -541,5 +710,8 @@ CuSuite *input_GetSuite(void)
     SUITE_ADD_TEST(suite, TestInputAcc_advance2);
     SUITE_ADD_TEST(suite, TestInputAcc_pageDown1);
     SUITE_ADD_TEST(suite, TestInputAcc_pageUp1);
+    SUITE_ADD_TEST(suite, TestInputAcc_insert1);
+    SUITE_ADD_TEST(suite, TestInputAcc_insert2);
+    SUITE_ADD_TEST(suite, TestInputAcc_insert3);
     return suite;
 }

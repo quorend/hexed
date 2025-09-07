@@ -7,8 +7,7 @@
 
 #define NONBUF_ROWS 3
 #define BUF_HEIGHT_LARGE_BUFFER (buffer_ctx->term_height - NONBUF_ROWS)
-#define BUF_HEIGHT_SMALL_BUFFER \
-    ((buffer_ctx->buf_len / 0x10) + (buffer_ctx->buf_len % 0x10 ? 1 : 0))
+#define BUF_HEIGHT_SMALL_BUFFER ((buffer_ctx->buf_len / 0x10) + 1)
 #define BUF_HEIGHT (buffer_ctx->buf_len < BUF_HEIGHT_LARGE_BUFFER * 0x10 ? \
                     BUF_HEIGHT_SMALL_BUFFER : BUF_HEIGHT_LARGE_BUFFER)
 
@@ -34,8 +33,10 @@ struct Buffer_Ctx
     const char *path;
     /* Buffer contents */
     uint8_t *buf;
-    /* Number of bytes in buffer */
+    /* Number of bytes in buffer (may be shorter than allocated length) */
     size_t buf_len;
+    /* Number of bytes allocated */
+    size_t alloc_len;
     /* Determine which address to show at the top of the address frame */
     size_t first_row;
     /* Position of point as offset from the begining of buffer */
