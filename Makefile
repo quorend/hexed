@@ -6,7 +6,8 @@ build/file-access.o \
 build/buffer.o \
 build/display.o \
 build/terminal.o \
-build/input.o
+build/input.o \
+build/CuTest-ex.o
 
 OBJBUILD = \
 build/main.o \
@@ -46,10 +47,13 @@ build/main.o: src/main.c src/file-access.h src/buffer.h src/terminal.h src/input
 build/CuTest.o: lib/cutest/CuTest.c lib/cutest/CuTest.h Makefile
 	$(CC) -o build/CuTest.o -c lib/cutest/CuTest.c
 
-build/file-access.o: src/file-access.c src/file-access.h src/buffer.h lib/cutest/CuTest.h Makefile
+build/CuTest-ex.o: src/CuTest-ex.c src/CuTest-ex.h lib/cutest/CuTest.h Makefile
+	$(CC) -o build/CuTest-ex.o -c src/CuTest-ex.c
+
+build/file-access.o: src/file-access.c src/file-access.h src/buffer.h src/CuTest-ex.h lib/cutest/CuTest.h Makefile
 	$(CC) -o build/file-access.o -c src/file-access.c
 
-build/buffer.o: src/buffer.c src/buffer.h lib/cutest/CuTest.h Makefile
+build/buffer.o: src/buffer.c src/buffer.h src/CuTest-ex.h lib/cutest/CuTest.h Makefile
 	$(CC) -o build/buffer.o -c src/buffer.c
 
 build/display.o: src/display.c src/display.h src/buffer.h Makefile
@@ -58,7 +62,7 @@ build/display.o: src/display.c src/display.h src/buffer.h Makefile
 build/terminal.o: src/terminal.c src/terminal.h Makefile
 	$(CC) -o build/terminal.o -c src/terminal.c
 
-build/input.o: src/input.c src/input.h src/buffer.h src/display.h src/file-access.h lib/cutest/CuTest.h Makefile
+build/input.o: src/input.c src/input.h src/buffer.h src/CuTest-ex.h lib/cutest/CuTest.h src/display.h src/file-access.h Makefile
 	$(CC) -o build/input.o -c src/input.c
 
 test/build/main.o: test/main.c lib/cutest/CuTest.h Makefile

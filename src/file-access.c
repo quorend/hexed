@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "file-access.h"
+#include "CuTest-ex.h"
 #include "cutest/CuTest.h"
 
 static int save_backup(struct Buffer_Ctx *buffer_ctx);

@@ -23,6 +23,7 @@
  ******************************************************************************/
 
 #include "buffer.h"
+#include "CuTest-ex.h"
 #include "cutest/CuTest.h"
 
 void buffer_init(struct Buffer_Ctx *buffer_ctx)

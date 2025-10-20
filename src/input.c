@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include "input.h"
+#include "CuTest-ex.h"
 #include "display.h"
 #include "file-access.h"
 #include "cutest/CuTest.h"
