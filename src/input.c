@@ -50,6 +50,7 @@ static void point_retreat(struct Buffer_Ctx *buffer_ctx);
 int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
     unsigned char c = '\0';
+    size_t position;
     ssize_t ec = 0;
     int file_err = 0;
     int rc = 0;
@@ -152,18 +153,32 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
                     break;
                 case 'B': /* DOWN arrow */
                     /* Point can go one past end of the buffer in MODE_INSERT */
-                    if (buffer_getPosition(buffer_ctx) <
-                        (buffer_ctx->buf_len -
-                         (buffer_ctx->mode == MODE_INSERT ? 0xF : 0x10)))
+
+                    /*
+                     * Find the first (minimum) point position value from which
+                     * we cannot legally navigate downwards.
+                     */
+                    position = (buffer_ctx->buf_len -
+                                (buffer_ctx->mode == MODE_INSERT ? 0xF : 0x10));
+                    position = (position > buffer_ctx->buf_len) ? 0 : position;
+
+                    if (buffer_getPosition(buffer_ctx) < position)
                     {
                         buffer_ctx->point_pos += 0x10;
                     }
                     break;
                 case 'C': /* RIGHT arrow */
                     /* Point can go one past end of the buffer in MODE_INSERT */
-                    if (buffer_getPosition(buffer_ctx) <
-                        (buffer_ctx->mode == MODE_INSERT ?
-                         buffer_ctx->buf_len : buffer_ctx->buf_len - 1))
+
+                    /*
+                     * Find the first (minimum) point position value from which
+                     * we cannot legally navigate right.
+                     */
+                    position = (buffer_ctx->mode == MODE_INSERT ?
+                                buffer_ctx->buf_len : buffer_ctx->buf_len - 1);
+                    position = (position > buffer_ctx->buf_len) ? 0 : position;
+
+                    if (buffer_getPosition(buffer_ctx) < position)
                     {
                         buffer_ctx->point_pos++;
                     }
