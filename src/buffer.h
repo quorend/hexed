@@ -23,6 +23,18 @@ enum Mode
 };
 
 /**
+ * @enum Style
+ * @brief Enumeration of possible byte entry styles.
+ */
+enum Style
+{
+    STYLE_ASCII,
+    STYLE_HEX,
+    STYLE_OCTAL,
+    STYLE_DECIMAL,
+};
+
+/**
  * @struct Buffer_Ctx
  * @brief Contains context information about the buffer. This information is
  *        used e.g. for navigating and displaying the buffer.
@@ -43,6 +55,10 @@ struct Buffer_Ctx
     size_t point_pos;
     /* Mode for editing buffer */
     enum Mode mode;
+    /* Style of byte entry */
+    enum Style style;
+    /* Byte entry keystroke count */
+    uint8_t k_stroke;
     /* Advance point after overwriting */
     bool advance;
     /* Number of rows in terminal */

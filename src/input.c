@@ -46,6 +46,7 @@ do \
 while (0)
 
 static void point_retreat(struct Buffer_Ctx *buffer_ctx);
+static void next_style(struct Buffer_Ctx *buffer_ctx);
 
 int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
@@ -98,8 +99,8 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 
                             if (point >= BUF_HEIGHT * 0x10)
                             {
-                                buffer_ctx->point_pos = ((BUF_HEIGHT - 1) * 0x10) +
-                                    (point % 0x10);
+                                buffer_ctx->point_pos =
+                                    ((BUF_HEIGHT - 1) * 0x10) + (point % 0x10);
                             }
                             else
                             {
@@ -210,6 +211,11 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
             buffer_ctx->mode = MODE_INSERT;
             display_draw(buffer_ctx, false);
         }
+        else if (c == 0x0E) /* C^N - Switch to next byte entry style */
+        {
+            next_style(buffer_ctx);
+            display_draw(buffer_ctx, false);
+        }
         else if (c == 0x10) /* C^P - Save buffer to file */
         {
             file_err = file_access_saveFile(buffer_ctx);
@@ -236,7 +242,7 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
             /* Discard unused Ctrl^ characters */
             continue;
         }
-        else
+        else /* Enter byte into buffer */
         {
             if (buffer_ctx->mode == MODE_OVERWRITE)
             {
@@ -335,6 +341,32 @@ static void point_retreat(struct Buffer_Ctx *buffer_ctx)
         buffer_ctx->point_pos != 0)
     {
         buffer_ctx->point_pos--;
+    }
+
+    return;
+}
+
+/**
+ * @brief Switch to the next byte entry style.
+ * @param[in,out] buffer_ctx buffer context structure
+ * @return void
+ */
+static void next_style(struct Buffer_Ctx *buffer_ctx)
+{
+    switch (buffer_ctx->style)
+    {
+    case STYLE_ASCII:
+        buffer_ctx->style = STYLE_HEX;
+        break;
+    case STYLE_HEX:
+        buffer_ctx->style = STYLE_OCTAL;
+        break;
+    case STYLE_OCTAL:
+        buffer_ctx->style = STYLE_DECIMAL;
+        break;
+    case STYLE_DECIMAL:
+        buffer_ctx->style = STYLE_ASCII;
+        break;
     }
 
     return;
