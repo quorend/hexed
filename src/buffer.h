@@ -58,7 +58,9 @@ struct Buffer_Ctx
     /* Style of byte entry */
     enum Style style;
     /* Byte entry keystroke count */
-    uint8_t k_stroke;
+    uint8_t keystroke_cnt;
+    /* Byte entry keystroke buffer */
+    uint8_t keystroke_buf[3];
     /* Advance point after overwriting */
     bool advance;
     /* Number of rows in terminal */

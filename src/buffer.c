@@ -36,7 +36,7 @@ void buffer_init(struct Buffer_Ctx *buffer_ctx)
     buffer_ctx->point_pos = 0;
     buffer_ctx->mode = MODE_READ;
     buffer_ctx->style = STYLE_ASCII;
-    buffer_ctx->k_stroke = 0;
+    buffer_ctx->keystroke_cnt = 0;
     buffer_ctx->advance = false;
     buffer_ctx->term_height = 32 + NONBUF_ROWS; /* TODO: Actually get height */
 
@@ -66,7 +66,7 @@ static void TestBufInit(CuTest *tc)
     CuAssertSizetEquals(tc, 0, buffer_ctx.point_pos);
     CuAssertIntEquals(tc, MODE_READ, buffer_ctx.mode);
     CuAssertIntEquals(tc, STYLE_ASCII, buffer_ctx.style);
-    CuAssertUint8tEquals(tc, 0, buffer_ctx.k_stroke);
+    CuAssertUint8tEquals(tc, 0, buffer_ctx.keystroke_cnt);
     CuAssertTrue(tc, buffer_ctx.advance == false);
     CuAssertTrue(tc, buffer_ctx.term_height >= 1 + NONBUF_ROWS);
 
