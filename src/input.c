@@ -241,13 +241,26 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
             if (buffer_ctx->mode == MODE_OVERWRITE)
             {
                 buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
-                if (buffer_ctx->advance == true)
+                if (buffer_ctx->advance == true &&
+                    buffer_ctx->point_pos < (buffer_ctx->buf_len - 1))
                 {
                     buffer_ctx->point_pos++;
                 }
             }
             else if (buffer_ctx->mode == MODE_INSERT)
             {
+                if (buffer_ctx->point_pos > buffer_ctx->buf_len)
+                {
+                    /* ERROR this should never happen */
+                    /*
+                     * Point has moved to an illegal position, so move it back.
+                     */
+                    printf("ERR: position of point was illegal");
+                    buffer_ctx->point_pos = buffer_ctx->buf_len;
+                    display_draw(buffer_ctx, false);
+                    continue;
+                }
+
                 if (buffer_ctx->buf_len == buffer_ctx->alloc_len)
                 {
                     uint8_t *buffer;
