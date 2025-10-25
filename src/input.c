@@ -46,6 +46,10 @@ do \
 while (0)
 
 static void point_retreat(struct Buffer_Ctx *buffer_ctx);
+static void next_style(struct Buffer_Ctx *buffer_ctx);
+static bool check_keystroke_cnt(struct Buffer_Ctx *buffer_ctx);
+static void reset_keystrokes(struct Buffer_Ctx *buffer_ctx);
+static void enter_byte(struct Buffer_Ctx *buffer_ctx);
 
 int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 {
@@ -98,8 +102,8 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
 
                             if (point >= BUF_HEIGHT * 0x10)
                             {
-                                buffer_ctx->point_pos = ((BUF_HEIGHT - 1) * 0x10) +
-                                    (point % 0x10);
+                                buffer_ctx->point_pos =
+                                    ((BUF_HEIGHT - 1) * 0x10) + (point % 0x10);
                             }
                             else
                             {
@@ -208,6 +212,12 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
         else if (c == 0x05) /* C^E - Switch to MODE_INSERT */
         {
             buffer_ctx->mode = MODE_INSERT;
+            reset_keystrokes(buffer_ctx);
+            display_draw(buffer_ctx, false);
+        }
+        else if (c == 0x0E) /* C^N - Switch to next byte entry style */
+        {
+            next_style(buffer_ctx);
             display_draw(buffer_ctx, false);
         }
         else if (c == 0x10) /* C^P - Save buffer to file */
@@ -223,12 +233,14 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
         {
             buffer_ctx->mode = MODE_READ;
             point_retreat(buffer_ctx);
+            reset_keystrokes(buffer_ctx);
             display_draw(buffer_ctx, false);
         }
         else if (c == 0x17) /* C^W - Switch to MODE_OVERWRITE */
         {
             buffer_ctx->mode = MODE_OVERWRITE;
             point_retreat(buffer_ctx);
+            reset_keystrokes(buffer_ctx);
             display_draw(buffer_ctx, false);
         }
         else if (c >= 0x01 && c <= 0x1A) /* (C^A to C^Z) */
@@ -236,11 +248,65 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
             /* Discard unused Ctrl^ characters */
             continue;
         }
-        else
+        else /* Enter byte into buffer */
         {
+            if (buffer_ctx->mode == MODE_READ)
+            {
+                continue;
+            }
+
+            /*
+             * The set of consumable keystrokes depends on the active byte entry
+             * style. If a non-consumable keystroke is received, just ignore it.
+             * Otherwise, stick it in the keystroke buffer.
+             */
+            switch (buffer_ctx->style)
+            {
+            case STYLE_ASCII:
+                if (c < 0x20 || c > 0x7E)
+                {
+                    continue;
+                }
+                buffer_ctx->keystroke_buf[buffer_ctx->keystroke_cnt] = c;
+                buffer_ctx->keystroke_cnt++;
+                break;
+            case STYLE_HEX:
+                if ((c < 0x30) ||
+                    (c > 0x39 && c < 0x41) ||
+                    (c > 0x46 && c < 0x61) ||
+                    (c > 0x66))
+                {
+                    continue;
+                }
+                buffer_ctx->keystroke_buf[buffer_ctx->keystroke_cnt] = c;
+                buffer_ctx->keystroke_cnt++;
+                break;
+            case STYLE_OCTAL:
+                if (c < 0x30 || c > 0x37)
+                {
+                    continue;
+                }
+                buffer_ctx->keystroke_buf[buffer_ctx->keystroke_cnt] = c;
+                buffer_ctx->keystroke_cnt++;
+                break;
+            case STYLE_DECIMAL:
+                if (c < 0x30 || c > 0x39)
+                {
+                    continue;
+                }
+                buffer_ctx->keystroke_buf[buffer_ctx->keystroke_cnt] = c;
+                buffer_ctx->keystroke_cnt++;
+                break;
+            }
+
+            if (!check_keystroke_cnt(buffer_ctx))
+            {
+                continue;
+            }
+
             if (buffer_ctx->mode == MODE_OVERWRITE)
             {
-                buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
+                enter_byte(buffer_ctx);
                 if (buffer_ctx->advance == true &&
                     buffer_ctx->point_pos < (buffer_ctx->buf_len - 1))
                 {
@@ -304,7 +370,7 @@ int input_accept(struct Buffer_Ctx *buffer_ctx, int fd)
                 buffer_ctx->buf_len++;
 
                 /* Write new byte to the correct index and increment point */
-                buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = c;
+                enter_byte(buffer_ctx);
                 buffer_ctx->point_pos++;
             }
 
@@ -336,6 +402,159 @@ static void point_retreat(struct Buffer_Ctx *buffer_ctx)
     {
         buffer_ctx->point_pos--;
     }
+
+    return;
+}
+
+/**
+ * @brief Switch to the next byte entry style.
+ * @param[in,out] buffer_ctx buffer context structure
+ * @return void
+ */
+static void next_style(struct Buffer_Ctx *buffer_ctx)
+{
+    switch (buffer_ctx->style)
+    {
+    case STYLE_ASCII:
+        buffer_ctx->style = STYLE_HEX;
+        break;
+    case STYLE_HEX:
+        buffer_ctx->style = STYLE_OCTAL;
+        break;
+    case STYLE_OCTAL:
+        buffer_ctx->style = STYLE_DECIMAL;
+        break;
+    case STYLE_DECIMAL:
+        buffer_ctx->style = STYLE_ASCII;
+        break;
+    }
+
+    return;
+}
+
+/**
+ * @brief Check to see if we have received the right number of keystrokes for
+ *        the active byte entry style.
+ * @param[in,out] buffer_ctx buffer context structure
+ * @return true if enough keystrokes have been received to enter a single byte
+ *         into the buffer, otherwise false
+ */
+static bool check_keystroke_cnt(struct Buffer_Ctx *buffer_ctx)
+{
+    switch (buffer_ctx->style)
+    {
+    case STYLE_ASCII:
+        if (buffer_ctx->keystroke_cnt == 1)
+        {
+            return true;
+        }
+        break;
+    case STYLE_HEX:
+        if (buffer_ctx->keystroke_cnt == 2)
+        {
+            return true;
+        }
+        break;
+    case STYLE_OCTAL:
+    case STYLE_DECIMAL:
+        if (buffer_ctx->keystroke_cnt == 3)
+        {
+            return true;
+        }
+        break;
+    }
+
+    return false;
+}
+
+/**
+ * @brief Clear the keystroke buffer.
+ * @param[out] buffer_ctx buffer context structure
+ * @return void
+ */
+static void reset_keystrokes(struct Buffer_Ctx *buffer_ctx)
+{
+    buffer_ctx->keystroke_cnt = 0;
+
+    return;
+}
+
+/**
+ * @brief Enter the byte into the file buffer.
+ * @param[in,out] buffer_ctx buffer context structure
+ * @return void
+ */
+static void enter_byte(struct Buffer_Ctx *buffer_ctx)
+{
+    uint8_t byte;
+
+    /* Convert the keystrokes into a byte */
+    switch (buffer_ctx->style)
+    {
+    case STYLE_ASCII:
+        byte = buffer_ctx->keystroke_buf[0];
+        break;
+    case STYLE_HEX:
+        for (int i = 0; i < 2; i++)
+        {
+            if (buffer_ctx->keystroke_buf[i] <= '9')
+            {
+                buffer_ctx->keystroke_buf[i] -= '0';
+            }
+            else
+            {
+                if (buffer_ctx->keystroke_buf[i] > 'F')
+                {
+                    buffer_ctx->keystroke_buf[i] -= 'a' - 'A';
+                }
+                buffer_ctx->keystroke_buf[i] -= 'A';
+                buffer_ctx->keystroke_buf[i] += 0xA;
+            }
+        }
+
+        buffer_ctx->keystroke_buf[0] *= 0x10;
+        buffer_ctx->keystroke_buf[1] *= 0x1;
+
+        byte = 0;
+        byte += buffer_ctx->keystroke_buf[0];
+        byte += buffer_ctx->keystroke_buf[1];
+
+        break;
+    case STYLE_OCTAL:
+        buffer_ctx->keystroke_buf[0] -= '0';
+        buffer_ctx->keystroke_buf[1] -= '0';
+        buffer_ctx->keystroke_buf[2] -= '0';
+
+        buffer_ctx->keystroke_buf[0] *= 0100;
+        buffer_ctx->keystroke_buf[1] *= 010;
+        buffer_ctx->keystroke_buf[2] *= 01;
+
+        byte = 0;
+        byte += buffer_ctx->keystroke_buf[0];
+        byte += buffer_ctx->keystroke_buf[1];
+        byte += buffer_ctx->keystroke_buf[2];
+
+        break;
+    case STYLE_DECIMAL:
+        buffer_ctx->keystroke_buf[0] -= '0';
+        buffer_ctx->keystroke_buf[1] -= '0';
+        buffer_ctx->keystroke_buf[2] -= '0';
+
+        buffer_ctx->keystroke_buf[0] *= 100;
+        buffer_ctx->keystroke_buf[1] *= 10;
+        buffer_ctx->keystroke_buf[2] *= 1;
+
+        byte = 0;
+        byte += buffer_ctx->keystroke_buf[0];
+        byte += buffer_ctx->keystroke_buf[1];
+        byte += buffer_ctx->keystroke_buf[2];
+
+        break;
+    }
+
+    buffer_ctx->buf[buffer_getPosition(buffer_ctx)] = byte;
+
+    reset_keystrokes(buffer_ctx);
 
     return;
 }

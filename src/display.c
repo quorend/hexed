@@ -51,6 +51,11 @@
 #define ADVANCE_0 " \e[33mA\e[m"
 #define ADVANCE_1 " \e[41mA\e[m"
 
+#define STYLE_A "       \e[33mascii  \e[m"
+#define STYLE_H "       \e[33mhex    \e[m"
+#define STYLE_O "       \e[33moctal  \e[m"
+#define STYLE_D "       \e[33mdecimal\e[m"
+
 void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
 {
     /* Used for printing the hex byte counts in the left column. */
@@ -178,6 +183,21 @@ void display_draw(struct Buffer_Ctx *buffer_ctx, bool clear)
     printf(buffer_ctx->mode == MODE_INSERT ? MODE_E_1 : MODE_E_0);
     printf(buffer_ctx->mode == MODE_READ ? MODE_R_1 : MODE_R_0);
     printf(buffer_ctx->advance == true ? ADVANCE_1 : ADVANCE_0);
+    switch (buffer_ctx->style)
+    {
+    case STYLE_ASCII:
+        printf(STYLE_A);
+        break;
+    case STYLE_HEX:
+        printf(STYLE_H);
+        break;
+    case STYLE_OCTAL:
+        printf(STYLE_O);
+        break;
+    case STYLE_DECIMAL:
+        printf(STYLE_D);
+        break;
+    }
     printf(RESET_COLORS "\r\n");
 
     return;
